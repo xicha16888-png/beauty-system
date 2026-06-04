@@ -1,0 +1,1430 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MORODOK · 医美贷款管理系统</title>
+    <style>
+:root {
+  --bg: #f4f6f8;
+  --panel: #ffffff;
+  --ink: #172026;
+  --muted: #68747d;
+  --line: #dce3e8;
+  --primary: #0f766e;
+  --primary-dark: #0b5f59;
+  --accent: #c2410c;
+  --warn: #b45309;
+  --danger: #b42318;
+  --good: #15803d;
+  --sidebar: #111827;
+  --sidebar-soft: #1f2937;
+  --shadow: 0 10px 28px rgba(25, 35, 45, 0.08);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+}
+
+.sidebar {
+  background: var(--sidebar);
+  color: #f8fafc;
+  padding: 22px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+}
+
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: var(--primary);
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.brand strong,
+.brand span {
+  display: block;
+}
+
+.brand span {
+  color: #a8b3bd;
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.nav {
+  display: grid;
+  gap: 6px;
+}
+
+.nav-item {
+  border: 0;
+  color: #d7dde3;
+  background: transparent;
+  text-align: left;
+  padding: 11px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  background: var(--sidebar-soft);
+  color: #ffffff;
+}
+
+.sidebar-foot {
+  margin-top: auto;
+  color: #a8b3bd;
+  font-size: 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.main {
+  padding: 28px;
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.topbar p,
+.panel-head span,
+.dialog-head p {
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.top-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+button {
+  border: 0;
+  border-radius: 6px;
+  min-height: 38px;
+  padding: 0 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.primary {
+  background: var(--primary);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.primary:hover {
+  background: var(--primary-dark);
+}
+
+.secondary {
+  background: #e8eef2;
+  color: #1d2934;
+  font-weight: 700;
+}
+
+.danger {
+  background: #fee4e2;
+  color: var(--danger);
+}
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: grid;
+  gap: 18px;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.kpi-grid.compact {
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+}
+
+.kpi {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  min-height: 112px;
+  display: grid;
+  align-content: space-between;
+}
+
+.kpi span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.kpi strong {
+  font-size: 26px;
+  margin-top: 8px;
+}
+
+.kpi small {
+  color: var(--muted);
+}
+
+.split-grid,
+.rule-grid,
+.clinic-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+  gap: 18px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+  min-width: 0;
+}
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+td {
+  font-size: 14px;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 11px;
+  background: #ffffff;
+  color: var(--ink);
+  min-height: 38px;
+}
+
+.filters input {
+  max-width: 360px;
+}
+
+.filters select {
+  max-width: 190px;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status.overdue {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status.closed {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status.rejected {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.bar-list,
+.compact-list,
+.clinic-cards {
+  display: grid;
+  gap: 12px;
+}
+
+.bar-row {
+  display: grid;
+  gap: 7px;
+}
+
+.bar-top,
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bar-track {
+  height: 10px;
+  background: #edf2f5;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+}
+
+.list-row {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.list-row strong,
+.list-row span {
+  display: block;
+}
+
+.list-row span,
+.meta {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.risk-score {
+  min-width: 44px;
+  height: 34px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  background: #ecfeff;
+  color: #155e75;
+}
+
+.risk-score.high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.risk-score.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.clinic-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.clinic-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.clinic-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.clinic-stats div {
+  background: #f7fafc;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.clinic-stats span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.clinic-stats strong {
+  display: block;
+  margin-top: 3px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 13px;
+}
+
+.form-grid.single {
+  grid-template-columns: 1fr;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  color: #34404a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.notes {
+  margin-top: 13px;
+}
+
+.full {
+  width: 100%;
+}
+
+.rule-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 12px;
+  color: #34404a;
+}
+
+dialog {
+  width: min(920px, calc(100vw - 28px));
+  border: 0;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.28);
+}
+
+dialog::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+#orderForm {
+  padding: 20px;
+}
+
+.dialog-head,
+.dialog-actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dialog-head {
+  margin-bottom: 18px;
+}
+
+.dialog-actions {
+  align-items: center;
+  margin-top: 18px;
+}
+
+.icon-btn {
+  width: 38px;
+  padding: 0;
+  background: #eef2f5;
+  color: #27333c;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.action-cell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tiny {
+  min-height: 30px;
+  padding: 0 9px;
+  font-size: 12px;
+}
+
+@media (max-width: 980px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+  }
+
+  .nav {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .split-grid,
+  .rule-grid,
+  .clinic-layout,
+  .kpi-grid,
+  .kpi-grid.compact {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .main {
+    padding: 18px;
+  }
+
+  .topbar,
+  .dialog-head,
+  .dialog-actions {
+    display: grid;
+  }
+
+  .top-actions {
+    justify-content: stretch;
+  }
+
+  .top-actions button,
+  .dialog-actions button {
+    width: 100%;
+  }
+
+  .nav {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filters input,
+  .filters select {
+    max-width: none;
+  }
+}
+
+/* 同步状态 */
+#syncStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #a8b3bd;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+#syncDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4caf50;
+  flex-shrink: 0;
+}
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">M</div>
+          <div>
+            <strong>医美贷管理</strong>
+            <span>MORODOK Portfolio</span>
+          </div>
+        </div>
+        <nav class="nav" aria-label="主导航">
+          <button class="nav-item active" data-view="dashboard">总览</button>
+          <button class="nav-item" data-view="orders">订单</button>
+          <button class="nav-item" data-view="repayments">还款</button>
+          <button class="nav-item" data-view="clinics">机构</button>
+          <button class="nav-item" data-view="reports">财务</button>
+          <button class="nav-item" data-view="risk">风控</button>
+        </nav>
+        <div class="sidebar-foot">
+          <span>MORODOK · 医美贷</span>
+          <strong id="todayLabel"></strong>
+          <div id="syncStatus">
+            <span id="syncDot"></span>
+            <span id="syncTxt">连接中...</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <h1 id="pageTitle">总览</h1>
+            <p id="pageSubtitle">医美分期业务的订单、还款、机构和风险数据。</p>
+          </div>
+          <div class="top-actions">
+            <button class="secondary" id="exportBtn" type="button">导出 CSV</button>
+            <button class="primary" id="newOrderBtn" type="button">新建订单</button>
+          </div>
+        </header>
+
+        <section class="view active" id="dashboardView">
+          <div class="kpi-grid" id="kpiGrid"></div>
+          <div class="split-grid">
+            <section class="panel">
+              <div class="panel-head"><h2>机构表现</h2><span>按放款与逾期</span></div>
+              <div id="clinicPerformance" class="bar-list"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head"><h2>风险队列</h2><span>优先处理</span></div>
+              <div id="riskQueue" class="compact-list"></div>
+            </section>
+          </div>
+          <section class="panel">
+            <div class="panel-head"><h2>最近订单</h2><span>最新进件与状态</span></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>订单</th><th>客户</th><th>机构</th><th>项目</th><th>金额</th><th>状态</th></tr></thead>
+                <tbody id="recentOrders"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="ordersView">
+          <div class="filters">
+            <input id="orderSearch" type="search" placeholder="搜索客户、机构、订单号" />
+            <select id="statusFilter">
+              <option value="all">全部状态</option>
+              <option value="pending">待审核</option>
+              <option value="active">还款中</option>
+              <option value="overdue">逾期</option>
+              <option value="closed">已结清</option>
+              <option value="rejected">已拒绝</option>
+            </select>
+            <select id="clinicFilter"><option value="all">全部机构</option></select>
+          </div>
+          <section class="panel">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>订单号</th><th>客户</th><th>机构</th><th>项目</th><th>本金</th><th>首付</th><th>期数</th><th>状态</th><th>操作</th></tr></thead>
+                <tbody id="ordersTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="repaymentsView">
+          <div class="kpi-grid compact" id="repaymentKpis"></div>
+          <section class="panel">
+            <div class="panel-head"><h2>应收计划</h2><span>按最近到期排序</span></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>到期日</th><th>订单</th><th>客户</th><th>期数</th><th>应收</th><th>状态</th><th>操作</th></tr></thead>
+                <tbody id="repaymentsTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="clinicsView">
+          <div class="clinic-layout">
+            <section class="panel">
+              <div class="panel-head"><h2>合作机构</h2><span>机构限额与坏账表现</span></div>
+              <div id="clinicCards" class="clinic-cards"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head"><h2>新增机构</h2><span>试点时控制总额度</span></div>
+              <form id="clinicForm" class="form-grid single">
+                <label>机构名称<input name="name" required /></label>
+                <label>联系人<input name="manager" required /></label>
+                <label>城市<input name="city" value="Phnom Penh" required /></label>
+                <label>试点限额 USD<input name="limit" type="number" min="1000" step="100" required /></label>
+                <button class="primary full" type="submit">保存机构</button>
+              </form>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="reportsView">
+          <div class="kpi-grid" id="financeKpis"></div>
+          <div class="split-grid">
+            <section class="panel">
+              <div class="panel-head"><h2>收入结构</h2><span>利息、服务费与未收</span></div>
+              <div id="incomeBars" class="bar-list"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head"><h2>组合质量</h2><span>首逾与逾期分布</span></div>
+              <div id="portfolioQuality" class="compact-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="riskView">
+          <div class="rule-grid">
+            <section class="panel">
+              <div class="panel-head"><h2>审批规则</h2><span>建议默认执行</span></div>
+              <ul class="rule-list">
+                <li>客户首付低于 20% 标记高风险。</li>
+                <li>月供超过月收入 30% 标记高风险。</li>
+                <li>同一机构首逾率超过 8% 暂停放量。</li>
+                <li>客户拒绝视频确认直接拒绝。</li>
+                <li>机构代填资料或催促秒批直接复核。</li>
+              </ul>
+            </section>
+            <section class="panel">
+              <div class="panel-head"><h2>待复核订单</h2><span>按风险分排序</span></div>
+              <div id="riskOrders" class="compact-list"></div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="orderDialog">
+      <form id="orderForm" method="dialog">
+        <div class="dialog-head">
+          <div>
+            <h2>新建医美分期订单</h2>
+            <p>款项默认直接结算给医美机构，客户按期还款。</p>
+          </div>
+          <button class="icon-btn" id="closeDialog" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="form-grid">
+          <label>客户姓名<input name="customer" required /></label>
+          <label>电话<input name="phone" required /></label>
+          <label>月收入 USD<input name="income" type="number" min="0" step="10" required /></label>
+          <label>机构<select name="clinic" id="orderClinicSelect" required></select></label>
+          <label>医美项目<input name="treatment" required placeholder="例如 激光脱毛疗程" /></label>
+          <label>项目总价 USD<input name="totalPrice" type="number" min="100" step="10" required /></label>
+          <label>客户首付 USD<input name="downPayment" type="number" min="0" step="10" required /></label>
+          <label>期数<select name="term">
+            <option value="3">3 期</option>
+            <option value="6">6 期</option>
+            <option value="9">9 期</option>
+            <option value="12">12 期</option>
+          </select></label>
+          <label>月利率 %<input name="monthlyRate" type="number" min="0" step="0.1" value="1.5" required /></label>
+          <label>机构服务费 %<input name="merchantFee" type="number" min="0" step="0.1" value="3" required /></label>
+          <label>视频确认<select name="videoConfirmed">
+            <option value="yes">已确认</option>
+            <option value="no">未确认</option>
+          </select></label>
+          <label>状态<select name="status">
+            <option value="pending">待审核</option>
+            <option value="active">还款中</option>
+            <option value="rejected">已拒绝</option>
+          </select></label>
+        </div>
+        <label class="notes">备注<textarea name="notes" rows="3" placeholder="客户来源、销售、特殊风险点"></textarea></label>
+        <div class="dialog-actions">
+          <button class="secondary" type="button" id="resetSampleBtn">恢复演示数据</button>
+          <button class="primary" type="submit">保存订单</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script>
+// Storage handled by backend API
+
+const statusText = {
+  pending: "待审核",
+  active: "还款中",
+  overdue: "逾期",
+  closed: "已结清",
+  rejected: "已拒绝",
+};
+
+const pageMeta = {
+  dashboard: ["总览", "医美分期业务的订单、还款、机构和风险数据。"],
+  orders: ["订单", "进件、审批、放款和订单状态管理。"],
+  repayments: ["还款", "跟踪每期应收、逾期和已还款记录。"],
+  clinics: ["机构", "管理合作医美机构、试点限额和渠道质量。"],
+  reports: ["财务", "查看放款、应收、收入、逾期和组合质量。"],
+  risk: ["风控", "按首付、收入负担、视频确认和机构表现识别风险。"],
+};
+
+const sampleData = {
+  clinics: [
+    { id: "CL-001", name: "Xeno Beauty Clinic", manager: "Sokha", city: "Phnom Penh", limit: 10000 },
+    { id: "CL-002", name: "Monet Beauty", manager: "Dara", city: "Phnom Penh", limit: 8000 },
+    { id: "CL-003", name: "Grand Med Skin Care", manager: "Vanna", city: "Daun Penh", limit: 6000 },
+  ],
+  orders: [
+    {
+      id: "MBL-260604-001",
+      customer: "Srey Mom",
+      phone: "096 332 118",
+      income: 780,
+      clinicId: "CL-001",
+      treatment: "激光脱毛疗程",
+      totalPrice: 900,
+      downPayment: 270,
+      principal: 630,
+      term: 6,
+      monthlyRate: 1.5,
+      merchantFee: 3,
+      status: "active",
+      videoConfirmed: true,
+      notes: "机构复购客户，首付充足。",
+      createdAt: "2026-06-01",
+      paidInstallments: 1,
+    },
+    {
+      id: "MBL-260604-002",
+      customer: "Chan Raksa",
+      phone: "088 510 3321",
+      income: 520,
+      clinicId: "CL-002",
+      treatment: "皮肤抗衰套组",
+      totalPrice: 1500,
+      downPayment: 250,
+      principal: 1250,
+      term: 9,
+      monthlyRate: 1.8,
+      merchantFee: 3,
+      status: "overdue",
+      videoConfirmed: true,
+      notes: "月供偏高，销售催批。",
+      createdAt: "2026-05-10",
+      paidInstallments: 0,
+    },
+    {
+      id: "MBL-260604-003",
+      customer: "Malis",
+      phone: "071 993 812",
+      income: 1100,
+      clinicId: "CL-003",
+      treatment: "水光护理 5 次",
+      totalPrice: 700,
+      downPayment: 210,
+      principal: 490,
+      term: 3,
+      monthlyRate: 1.3,
+      merchantFee: 2.5,
+      status: "closed",
+      videoConfirmed: true,
+      notes: "提前结清。",
+      createdAt: "2026-04-22",
+      paidInstallments: 3,
+    },
+    {
+      id: "MBL-260604-004",
+      customer: "Nita",
+      phone: "097 445 2019",
+      income: 430,
+      clinicId: "CL-001",
+      treatment: "牙齿美白",
+      totalPrice: 480,
+      downPayment: 60,
+      principal: 420,
+      term: 6,
+      monthlyRate: 1.6,
+      merchantFee: 3,
+      status: "pending",
+      videoConfirmed: false,
+      notes: "未完成视频确认，首付低。",
+      createdAt: "2026-06-03",
+      paidInstallments: 0,
+    },
+  ],
+};
+
+let state = structuredClone(sampleData);
+let _syncStatus = "idle";
+
+function setSyncStatus(s) {
+  _syncStatus = s;
+  const dot = document.getElementById("syncDot");
+  const txt = document.getElementById("syncTxt");
+  if (!dot || !txt) return;
+  if (s === "syncing") { dot.style.background = "#ff9800"; txt.textContent = "同步中..."; }
+  else if (s === "ok") { dot.style.background = "#4caf50"; txt.textContent = "已同步"; }
+  else if (s === "error") { dot.style.background = "#f44336"; txt.textContent = "同步失败"; }
+}
+
+async function loadState() {
+  try {
+    setSyncStatus("syncing");
+    const res = await fetch("/api/data");
+    const data = await res.json();
+    if (data.orders) state.orders = data.orders;
+    if (data.clinics) state.clinics = data.clinics;
+    setSyncStatus("ok");
+  } catch (e) {
+    setSyncStatus("error");
+  }
+}
+
+async function saveState() {
+  try {
+    setSyncStatus("syncing");
+    const res = await fetch("/api/data", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orders: state.orders, clinics: state.clinics })
+    });
+    if (res.ok) setSyncStatus("ok"); else setSyncStatus("error");
+  } catch (e) {
+    setSyncStatus("error");
+  }
+}
+
+function money(value) {
+  return `$${Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+}
+
+function pct(value) {
+  return `${Number(value || 0).toFixed(1)}%`;
+}
+
+function addDays(date, days) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function formatDate(date) {
+  return new Date(date).toISOString().slice(0, 10);
+}
+
+function getClinic(id) {
+  return state.clinics.find((clinic) => clinic.id === id) || { name: "未知机构", limit: 0 };
+}
+
+function installmentAmount(order) {
+  const totalInterest = order.principal * (order.monthlyRate / 100) * order.term;
+  return (order.principal + totalInterest) / order.term;
+}
+
+function merchantFee(order) {
+  return order.principal * (order.merchantFee / 100);
+}
+
+function interestIncome(order) {
+  return order.principal * (order.monthlyRate / 100) * order.term;
+}
+
+function paymentSchedule(order) {
+  return Array.from({ length: order.term }, (_, index) => {
+    const dueDate = addDays(order.createdAt, 30 * (index + 1));
+    let status = "unpaid";
+    if (index < order.paidInstallments) status = "paid";
+    if (order.status === "overdue" && index === order.paidInstallments) status = "overdue";
+    if (order.status === "closed") status = "paid";
+    return {
+      orderId: order.id,
+      customer: order.customer,
+      index: index + 1,
+      dueDate: formatDate(dueDate),
+      amount: installmentAmount(order),
+      status,
+    };
+  });
+}
+
+function allRepayments() {
+  return state.orders
+    .filter((order) => ["active", "overdue", "closed"].includes(order.status))
+    .flatMap(paymentSchedule)
+    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+}
+
+function riskScore(order) {
+  const downPaymentRatio = order.downPayment / order.totalPrice;
+  const monthlyBurden = installmentAmount(order) / Math.max(order.income, 1);
+  const clinic = clinicStats(order.clinicId);
+  let score = 20;
+  if (downPaymentRatio < 0.2) score += 25;
+  if (monthlyBurden > 0.3) score += 25;
+  if (!order.videoConfirmed) score += 25;
+  if (clinic.firstOverdueRate > 8) score += 15;
+  if (order.status === "overdue") score += 20;
+  return Math.min(score, 100);
+}
+
+function riskClass(score) {
+  if (score >= 70) return "high";
+  if (score >= 45) return "medium";
+  return "low";
+}
+
+function clinicStats(clinicId) {
+  const orders = state.orders.filter((order) => order.clinicId === clinicId);
+  const activeOrders = orders.filter((order) => order.status !== "rejected");
+  const principal = activeOrders.reduce((sum, order) => sum + order.principal, 0);
+  const overdue = activeOrders.filter((order) => order.status === "overdue").length;
+  const firstOverdue = activeOrders.filter((order) => order.status === "overdue" && order.paidInstallments === 0).length;
+  return {
+    orders: activeOrders.length,
+    principal,
+    overdueRate: activeOrders.length ? (overdue / activeOrders.length) * 100 : 0,
+    firstOverdueRate: activeOrders.length ? (firstOverdue / activeOrders.length) * 100 : 0,
+  };
+}
+
+function portfolioMetrics() {
+  const funded = state.orders.filter((order) => ["active", "overdue", "closed"].includes(order.status));
+  const principal = funded.reduce((sum, order) => sum + order.principal, 0);
+  const outstanding = funded.reduce((sum, order) => {
+    const remaining = Math.max(order.term - order.paidInstallments, 0);
+    return sum + installmentAmount(order) * remaining;
+  }, 0);
+  const interest = funded.reduce((sum, order) => sum + interestIncome(order), 0);
+  const fees = funded.reduce((sum, order) => sum + merchantFee(order), 0);
+  const overdue = funded.filter((order) => order.status === "overdue");
+  const firstOverdue = overdue.filter((order) => order.paidInstallments === 0);
+  return {
+    funded,
+    principal,
+    outstanding,
+    interest,
+    fees,
+    overdueRate: funded.length ? (overdue.length / funded.length) * 100 : 0,
+    firstOverdueRate: funded.length ? (firstOverdue.length / funded.length) * 100 : 0,
+  };
+}
+
+function render() {
+  renderClinicOptions();
+  renderDashboard();
+  renderOrders();
+  renderRepayments();
+  renderClinics();
+  renderReports();
+  renderRisk();
+}
+
+function renderDashboard() {
+  const metrics = portfolioMetrics();
+  const pending = state.orders.filter((order) => order.status === "pending").length;
+  const active = state.orders.filter((order) => order.status === "active").length;
+  const kpis = [
+    ["累计放款", money(metrics.principal), `${metrics.funded.length} 笔有效订单`],
+    ["待收金额", money(metrics.outstanding), "含本金和利息"],
+    ["首逾率", pct(metrics.firstOverdueRate), "超过 8% 需暂停渠道"],
+    ["待审核", String(pending), `${active} 笔还款中`],
+  ];
+  document.getElementById("kpiGrid").innerHTML = kpis.map(kpiCard).join("");
+
+  const maxPrincipal = Math.max(...state.clinics.map((clinic) => clinicStats(clinic.id).principal), 1);
+  document.getElementById("clinicPerformance").innerHTML = state.clinics
+    .map((clinic) => {
+      const stats = clinicStats(clinic.id);
+      const width = Math.max((stats.principal / maxPrincipal) * 100, 4);
+      return `
+        <div class="bar-row">
+          <div class="bar-top"><strong>${clinic.name}</strong><span>${money(stats.principal)} · 逾期 ${pct(stats.overdueRate)}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+        </div>
+      `;
+    })
+    .join("");
+
+  document.getElementById("riskQueue").innerHTML = riskRows(state.orders, 4);
+  document.getElementById("recentOrders").innerHTML = state.orders
+    .slice()
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5)
+    .map((order) => `
+      <tr>
+        <td>${order.id}</td>
+        <td>${order.customer}</td>
+        <td>${getClinic(order.clinicId).name}</td>
+        <td>${order.treatment}</td>
+        <td>${money(order.principal)}</td>
+        <td>${statusBadge(order.status)}</td>
+      </tr>
+    `)
+    .join("");
+}
+
+function renderOrders() {
+  const search = document.getElementById("orderSearch").value.trim().toLowerCase();
+  const status = document.getElementById("statusFilter").value;
+  const clinic = document.getElementById("clinicFilter").value;
+  const rows = state.orders.filter((order) => {
+    const clinicName = getClinic(order.clinicId).name.toLowerCase();
+    const haystack = `${order.id} ${order.customer} ${clinicName} ${order.treatment}`.toLowerCase();
+    return (!search || haystack.includes(search)) && (status === "all" || order.status === status) && (clinic === "all" || order.clinicId === clinic);
+  });
+
+  document.getElementById("ordersTable").innerHTML = rows
+    .map((order) => `
+      <tr>
+        <td>${order.id}</td>
+        <td><strong>${order.customer}</strong><div class="meta">${order.phone}</div></td>
+        <td>${getClinic(order.clinicId).name}</td>
+        <td>${order.treatment}</td>
+        <td>${money(order.principal)}</td>
+        <td>${money(order.downPayment)}</td>
+        <td>${order.term}</td>
+        <td>${statusBadge(order.status)}</td>
+        <td>
+          <div class="action-cell">
+            ${order.status === "pending" ? `<button class="primary tiny" data-action="approve" data-id="${order.id}">通过</button>` : ""}
+            ${order.status === "active" ? `<button class="secondary tiny" data-action="overdue" data-id="${order.id}">标逾期</button>` : ""}
+            ${["active", "overdue"].includes(order.status) ? `<button class="secondary tiny" data-action="close" data-id="${order.id}">结清</button>` : ""}
+            ${order.status === "pending" ? `<button class="danger tiny" data-action="reject" data-id="${order.id}">拒绝</button>` : ""}
+          </div>
+        </td>
+      </tr>
+    `)
+    .join("");
+}
+
+function renderRepayments() {
+  const repayments = allRepayments();
+  const due = repayments.filter((item) => item.status === "unpaid");
+  const overdue = repayments.filter((item) => item.status === "overdue");
+  const paid = repayments.filter((item) => item.status === "paid");
+  document.getElementById("repaymentKpis").innerHTML = [
+    ["未收期数", String(due.length), money(due.reduce((sum, item) => sum + item.amount, 0))],
+    ["逾期期数", String(overdue.length), money(overdue.reduce((sum, item) => sum + item.amount, 0))],
+    ["已收期数", String(paid.length), money(paid.reduce((sum, item) => sum + item.amount, 0))],
+  ].map(kpiCard).join("");
+
+  document.getElementById("repaymentsTable").innerHTML = repayments
+    .map((item) => {
+      const order = state.orders.find((candidate) => candidate.id === item.orderId);
+      return `
+        <tr>
+          <td>${item.dueDate}</td>
+          <td>${item.orderId}</td>
+          <td>${item.customer}</td>
+          <td>${item.index}/${order.term}</td>
+          <td>${money(item.amount)}</td>
+          <td>${repaymentBadge(item.status)}</td>
+          <td>${item.status !== "paid" ? `<button class="primary tiny" data-action="pay" data-id="${item.orderId}">记一笔还款</button>` : ""}</td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+function renderClinics() {
+  document.getElementById("clinicCards").innerHTML = state.clinics
+    .map((clinic) => {
+      const stats = clinicStats(clinic.id);
+      return `
+        <article class="clinic-card">
+          <header>
+            <div>
+              <strong>${clinic.name}</strong>
+              <div class="meta">${clinic.city} · ${clinic.manager}</div>
+            </div>
+            <span class="status ${stats.firstOverdueRate > 8 ? "overdue" : "active"}">${stats.firstOverdueRate > 8 ? "暂停复核" : "正常"}</span>
+          </header>
+          <div class="clinic-stats">
+            <div><span>试点限额</span><strong>${money(clinic.limit)}</strong></div>
+            <div><span>已放款</span><strong>${money(stats.principal)}</strong></div>
+            <div><span>首逾率</span><strong>${pct(stats.firstOverdueRate)}</strong></div>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderReports() {
+  const metrics = portfolioMetrics();
+  document.getElementById("financeKpis").innerHTML = [
+    ["放款本金", money(metrics.principal), "不含拒绝和待审核"],
+    ["利息收入", money(metrics.interest), "按完整期限估算"],
+    ["机构服务费", money(metrics.fees), "按本金比例估算"],
+    ["组合逾期率", pct(metrics.overdueRate), "按订单数量"],
+  ].map(kpiCard).join("");
+
+  const incomeItems = [
+    ["利息收入", metrics.interest],
+    ["机构服务费", metrics.fees],
+    ["待收金额", metrics.outstanding],
+  ];
+  const max = Math.max(...incomeItems.map((item) => item[1]), 1);
+  document.getElementById("incomeBars").innerHTML = incomeItems.map(([label, value]) => `
+    <div class="bar-row">
+      <div class="bar-top"><strong>${label}</strong><span>${money(value)}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max((value / max) * 100, 4)}%"></div></div>
+    </div>
+  `).join("");
+
+  document.getElementById("portfolioQuality").innerHTML = `
+    <div class="list-row"><div><strong>首逾率</strong><span>第一期未还的风险指标</span></div><div class="risk-score ${riskClass(metrics.firstOverdueRate * 8)}">${pct(metrics.firstOverdueRate)}</div></div>
+    <div class="list-row"><div><strong>逾期率</strong><span>当前逾期订单占比</span></div><div class="risk-score ${riskClass(metrics.overdueRate * 7)}">${pct(metrics.overdueRate)}</div></div>
+    <div class="list-row"><div><strong>平均单笔本金</strong><span>控制在试点额度内</span></div><div class="risk-score">${money(metrics.funded.length ? metrics.principal / metrics.funded.length : 0)}</div></div>
+  `;
+}
+
+function renderRisk() {
+  document.getElementById("riskOrders").innerHTML = riskRows(state.orders, state.orders.length);
+}
+
+function riskRows(orders, limit) {
+  return orders
+    .slice()
+    .sort((a, b) => riskScore(b) - riskScore(a))
+    .slice(0, limit)
+    .map((order) => {
+      const score = riskScore(order);
+      return `
+        <div class="list-row">
+          <div>
+            <strong>${order.customer} · ${order.treatment}</strong>
+            <span>${getClinic(order.clinicId).name} · 首付 ${pct((order.downPayment / order.totalPrice) * 100)} · 月供 ${money(installmentAmount(order))}</span>
+          </div>
+          <div class="risk-score ${riskClass(score)}">${score}</div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function kpiCard([label, value, note]) {
+  return `<article class="kpi"><span>${label}</span><strong>${value}</strong><small>${note}</small></article>`;
+}
+
+function statusBadge(status) {
+  return `<span class="status ${status}">${statusText[status]}</span>`;
+}
+
+function repaymentBadge(status) {
+  const map = { paid: ["closed", "已还"], unpaid: ["pending", "未收"], overdue: ["overdue", "逾期"] };
+  const [className, text] = map[status];
+  return `<span class="status ${className}">${text}</span>`;
+}
+
+function renderClinicOptions() {
+  const options = state.clinics.map((clinic) => `<option value="${clinic.id}">${clinic.name}</option>`).join("");
+  document.getElementById("orderClinicSelect").innerHTML = options;
+  document.getElementById("clinicFilter").innerHTML = `<option value="all">全部机构</option>${options}`;
+}
+
+async function addOrder(form) {
+  const data = Object.fromEntries(new FormData(form).entries());
+  const totalPrice = Number(data.totalPrice);
+  const downPayment = Number(data.downPayment);
+  const principal = Math.max(totalPrice - downPayment, 0);
+  const order = {
+    id: `MBL-${new Date().toISOString().slice(2, 10).replaceAll("-", "")}-${String(state.orders.length + 1).padStart(3, "0")}`,
+    customer: data.customer,
+    phone: data.phone,
+    income: Number(data.income),
+    clinicId: data.clinic,
+    treatment: data.treatment,
+    totalPrice,
+    downPayment,
+    principal,
+    term: Number(data.term),
+    monthlyRate: Number(data.monthlyRate),
+    merchantFee: Number(data.merchantFee),
+    status: data.status,
+    videoConfirmed: data.videoConfirmed === "yes",
+    notes: data.notes,
+    createdAt: formatDate(new Date()),
+    paidInstallments: 0,
+  };
+  state.orders.unshift(order);
+  saveState();
+  render();
+}
+
+async function addClinic(form) {
+  const data = Object.fromEntries(new FormData(form).entries());
+  state.clinics.push({
+    id: `CL-${String(state.clinics.length + 1).padStart(3, "0")}`,
+    name: data.name,
+    manager: data.manager,
+    city: data.city,
+    limit: Number(data.limit),
+  });
+  saveState();
+  form.reset();
+  render();
+}
+
+async function updateOrder(id, action) {
+  const order = state.orders.find((item) => item.id === id);
+  if (!order) return;
+  if (action === "approve") order.status = "active";
+  if (action === "reject") order.status = "rejected";
+  if (action === "overdue") order.status = "overdue";
+  if (action === "close") {
+    order.status = "closed";
+    order.paidInstallments = order.term;
+  }
+  if (action === "pay") {
+    order.paidInstallments = Math.min(order.paidInstallments + 1, order.term);
+    if (order.paidInstallments >= order.term) order.status = "closed";
+    if (order.status === "overdue" && order.paidInstallments < order.term) order.status = "active";
+  }
+  saveState();
+  render();
+}
+
+function exportCsv() {
+  const rows = [
+    ["订单号", "客户", "电话", "机构", "项目", "总价", "首付", "本金", "期数", "月利率", "机构服务费", "状态", "风险分", "创建日期"],
+    ...state.orders.map((order) => [
+      order.id,
+      order.customer,
+      order.phone,
+      getClinic(order.clinicId).name,
+      order.treatment,
+      order.totalPrice,
+      order.downPayment,
+      order.principal,
+      order.term,
+      order.monthlyRate,
+      order.merchantFee,
+      statusText[order.status],
+      riskScore(order),
+      order.createdAt,
+    ]),
+  ];
+  const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
+  const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `medical-beauty-loans-${formatDate(new Date())}.csv`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+document.querySelectorAll(".nav-item").forEach((button) => {
+  button.addEventListener("click", () => {
+    const view = button.dataset.view;
+    document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item === button));
+    document.querySelectorAll(".view").forEach((section) => section.classList.remove("active"));
+    document.getElementById(`${view}View`).classList.add("active");
+    document.getElementById("pageTitle").textContent = pageMeta[view][0];
+    document.getElementById("pageSubtitle").textContent = pageMeta[view][1];
+  });
+});
+
+document.getElementById("newOrderBtn").addEventListener("click", () => document.getElementById("orderDialog").showModal());
+document.getElementById("closeDialog").addEventListener("click", () => document.getElementById("orderDialog").close());
+document.getElementById("exportBtn").addEventListener("click", exportCsv);
+document.getElementById("orderForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  addOrder(event.currentTarget);
+  document.getElementById("orderDialog").close();
+  event.currentTarget.reset();
+});
+document.getElementById("clinicForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  addClinic(event.currentTarget);
+});
+document.getElementById("resetSampleBtn").addEventListener("click", async () => {
+  state = structuredClone(sampleData);
+  await saveState();
+  render();
+});
+document.getElementById("orderSearch").addEventListener("input", renderOrders);
+document.getElementById("statusFilter").addEventListener("change", renderOrders);
+document.getElementById("clinicFilter").addEventListener("change", renderOrders);
+document.body.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-action]");
+  if (!button) return;
+  updateOrder(button.dataset.id, button.dataset.action);
+});
+
+document.getElementById("todayLabel").textContent = formatDate(new Date());
+loadState().then(() => render());
+
+    </script>
+  </body>
+</html>
