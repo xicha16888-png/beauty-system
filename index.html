@@ -740,12 +740,10 @@ dialog::backdrop {
         </section>
 
         <section class="view" id="reportsView">
+        <section class="view" id="reportsView">
           <div class="kpi-grid" id="financeKpis"></div>
-          <div class="split-grid">
-            <section class="panel">
-              <div class="panel-head"><h2>收入结构</h2><span>利息、服务费与未收</span></div>
-              <div id="incomeBars" class="bar-list"></div>
-            </section>
+          <div id="financeReport" style="display:grid;gap:18px;margin-top:18px"></div>
+        </section>
             <section class="panel">
               <div class="panel-head"><h2>组合质量</h2><span>首逾与逾期分布</span></div>
               <div id="portfolioQuality" class="compact-list"></div>
@@ -1227,30 +1225,249 @@ function renderClinics() {
 
 function renderReports() {
   const metrics = portfolioMetrics();
-  document.getElementById("financeKpis").innerHTML = [
-    ["放款本金", money(metrics.principal), "不含拒绝和待审核"],
-    ["利息收入", money(metrics.interest), "按完整期限估算"],
-    ["机构服务费", money(metrics.fees), "按本金比例估算"],
-    ["组合逾期率", pct(metrics.overdueRate), "按订单数量"],
-  ].map(kpiCard).join("");
+  const funded = metrics.funded;
+  const closed = funded.filter(o => o.status === "closed");
+  const active = funded.filter(o => o.status === "active");
+  const overdue = funded.filter(o => o.status === "overdue");
+  const totalCollected = funded.reduce((s, o) => s + installmentAmount(o) * o.paidInstallments, 0);
+  const totalPrincipal = funded.reduce((s, o) => s + o.principal, 0);
+  const totalInterest = metrics.interest;
+  const totalFees = metrics.fees;
+  const totalRevenue = totalInterest + totalFees;
+  const avgLoan = funded.length ? totalPrincipal / funded.length : 0;
+  const avgTerm = funded.length ? funded.reduce((s, o) => s + o.term, 0) / funded.length : 0;
+  const collectionRate = (totalPrincipal + totalInterest) > 0 ? (totalCollected / (totalPrincipal + totalInterest)) * 100 : 0;
+  const pendingOrders = state.orders.filter(o => o.status === "pending").length;
 
-  const incomeItems = [
-    ["利息收入", metrics.interest],
-    ["机构服务费", metrics.fees],
-    ["待收金额", metrics.outstanding],
-  ];
-  const max = Math.max(...incomeItems.map((item) => item[1]), 1);
-  document.getElementById("incomeBars").innerHTML = incomeItems.map(([label, value]) => `
-    <div class="bar-row">
-      <div class="bar-top"><strong>${label}</strong><span>${money(value)}</span></div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.max((value / max) * 100, 4)}%"></div></div>
+  // ── KPI 卡片 ──
+  document.getElementById("financeKpis").innerHTML = `
+    <div class="kpi" style="border-left:4px solid #0f766e">
+      <span>💰 放款总额</span>
+      <strong style="color:#0f766e">${money(totalPrincipal)}</strong>
+      <small>${funded.length} 笔有效订单</small>
     </div>
-  `).join("");
+    <div class="kpi" style="border-left:4px solid #7c3aed">
+      <span>📈 预计总收益</span>
+      <strong style="color:#7c3aed">${money(totalRevenue)}</strong>
+      <small>利息 ${money(totalInterest)} + 服务费 ${money(totalFees)}</small>
+    </div>
+    <div class="kpi" style="border-left:4px solid #0284c7">
+      <span>✅ 已回收金额</span>
+      <strong style="color:#0284c7">${money(totalCollected)}</strong>
+      <small>回收率 ${pct(collectionRate)}</small>
+    </div>
+    <div class="kpi" style="border-left:4px solid #dc2626">
+      <span>⏳ 待回收余额</span>
+      <strong style="color:#dc2626">${money(metrics.outstanding)}</strong>
+      <small>${overdue.length} 笔逾期 · ${active.length} 笔还款中</small>
+    </div>
+  `;
 
-  document.getElementById("portfolioQuality").innerHTML = `
-    <div class="list-row"><div><strong>首逾率</strong><span>第一期未还的风险指标</span></div><div class="risk-score ${riskClass(metrics.firstOverdueRate * 8)}">${pct(metrics.firstOverdueRate)}</div></div>
-    <div class="list-row"><div><strong>逾期率</strong><span>当前逾期订单占比</span></div><div class="risk-score ${riskClass(metrics.overdueRate * 7)}">${pct(metrics.overdueRate)}</div></div>
-    <div class="list-row"><div><strong>平均单笔本金</strong><span>控制在试点额度内</span></div><div class="risk-score">${money(metrics.funded.length ? metrics.principal / metrics.funded.length : 0)}</div></div>
+  // ── 机构收益排行 ──
+  const clinicRevenue = state.clinics.map(clinic => {
+    const orders = funded.filter(o => o.clinicId === clinic.id);
+    const p = orders.reduce((s, o) => s + o.principal, 0);
+    const i = orders.reduce((s, o) => s + interestIncome(o), 0);
+    const f = orders.reduce((s, o) => s + merchantFee(o), 0);
+    const collected = orders.reduce((s, o) => s + installmentAmount(o) * o.paidInstallments, 0);
+    const overdueCount = orders.filter(o => o.status === "overdue").length;
+    return { name: clinic.name, orders: orders.length, principal: p, interest: i, fees: f, revenue: i + f, collected, overdueCount };
+  }).filter(c => c.orders > 0).sort((a, b) => b.revenue - a.revenue);
+
+  const maxRev = Math.max(...clinicRevenue.map(c => c.revenue), 1);
+
+  // ── 月度趋势（按订单创建月份）──
+  const monthMap = {};
+  funded.forEach(o => {
+    const m = new Date(o.createdAt).toISOString().slice(0, 7);
+    if (!monthMap[m]) monthMap[m] = { month: m, count: 0, principal: 0, interest: 0 };
+    monthMap[m].count++;
+    monthMap[m].principal += o.principal;
+    monthMap[m].interest += interestIncome(o);
+  });
+  const months = Object.values(monthMap).sort((a, b) => a.month.localeCompare(b.month));
+  const maxMonth = Math.max(...months.map(m => m.principal), 1);
+
+  // ── 项目分布 ──
+  const treatMap = {};
+  funded.forEach(o => {
+    const key = o.treatment || "其他";
+    if (!treatMap[key]) treatMap[key] = { count: 0, principal: 0 };
+    treatMap[key].count++;
+    treatMap[key].principal += o.principal;
+  });
+  const treats = Object.entries(treatMap).sort((a, b) => b[1].principal - a[1].principal).slice(0, 5);
+  const maxTreat = Math.max(...treats.map(t => t[1].principal), 1);
+
+  const colors = ["#0f766e","#7c3aed","#0284c7","#dc2626","#d97706"];
+
+  const reportsEl = document.getElementById("financeReport");
+  if (reportsEl) reportsEl.innerHTML = `
+    <!-- 收支总览表 -->
+    <section class="panel">
+      <div class="panel-head"><h2>📊 收支总览</h2><span>所有有效订单汇总</span></div>
+      <div style="overflow-x:auto">
+        <table style="min-width:600px">
+          <thead><tr>
+            <th>科目</th><th>金额</th><th>占比</th><th>说明</th>
+          </tr></thead>
+          <tbody>
+            <tr style="background:#f0fdf4">
+              <td><b style="color:#15803d">📥 放款本金</b></td>
+              <td><b style="color:#15803d">${money(totalPrincipal)}</b></td>
+              <td>—</td><td style="color:#6b7280;font-size:12px">${funded.length} 笔有效订单</td>
+            </tr>
+            <tr>
+              <td>📈 利息收入（预计）</td>
+              <td>${money(totalInterest)}</td>
+              <td>${pct(totalPrincipal ? (totalInterest/totalPrincipal)*100 : 0)}</td>
+              <td style="color:#6b7280;font-size:12px">按完整期限计算</td>
+            </tr>
+            <tr>
+              <td>🏥 机构服务费</td>
+              <td>${money(totalFees)}</td>
+              <td>${pct(totalPrincipal ? (totalFees/totalPrincipal)*100 : 0)}</td>
+              <td style="color:#6b7280;font-size:12px">按本金比例收取</td>
+            </tr>
+            <tr style="background:#f0f9ff">
+              <td><b style="color:#0284c7">💵 总收益（预计）</b></td>
+              <td><b style="color:#0284c7">${money(totalRevenue)}</b></td>
+              <td><b>${pct(totalPrincipal ? (totalRevenue/totalPrincipal)*100 : 0)}</b></td>
+              <td style="color:#6b7280;font-size:12px">利息 + 服务费</td>
+            </tr>
+            <tr style="background:#fffbeb">
+              <td>✅ 已回收（含本金+利息）</td>
+              <td>${money(totalCollected)}</td>
+              <td>${pct(collectionRate)}</td>
+              <td style="color:#6b7280;font-size:12px">实际到账金额</td>
+            </tr>
+            <tr style="background:#fef2f2">
+              <td><b style="color:#dc2626">⏳ 待回收余额</b></td>
+              <td><b style="color:#dc2626">${money(metrics.outstanding)}</b></td>
+              <td>${pct((totalPrincipal+totalInterest) ? (metrics.outstanding/(totalPrincipal+totalInterest))*100 : 0)}</td>
+              <td style="color:#6b7280;font-size:12px">${overdue.length} 笔逾期需催收</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 订单状态分布 + 关键指标 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <section class="panel">
+        <div class="panel-head"><h2>📋 订单状态分布</h2></div>
+        <div style="display:grid;gap:10px;margin-top:4px">
+          ${[
+            ["还款中", active.length, state.orders.filter(o=>o.status==="active").length, "#0f766e", "active"],
+            ["已结清", closed.length, state.orders.filter(o=>o.status==="closed").length, "#0284c7", "closed"],
+            ["逾期", overdue.length, state.orders.filter(o=>o.status==="overdue").length, "#dc2626", "overdue"],
+            ["待审核", 0, pendingOrders, "#d97706", "pending"],
+          ].map(([label, _, count, color, cls]) => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;background:#f8fafc;border-left:3px solid ${color}">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="status ${cls}">${label}</span>
+              </div>
+              <div style="text-align:right">
+                <strong style="color:${color};font-size:20px">${count}</strong>
+                <div style="font-size:11px;color:#6b7280">笔</div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>📌 关键指标</h2></div>
+        <div style="display:grid;gap:10px;margin-top:4px">
+          ${[
+            ["平均单笔放款", money(avgLoan), "#0f766e"],
+            ["平均贷款期限", avgTerm.toFixed(1) + " 期", "#7c3aed"],
+            ["回收率", pct(collectionRate), collectionRate >= 80 ? "#15803d" : "#dc2626"],
+            ["逾期率", pct(metrics.overdueRate), metrics.overdueRate <= 5 ? "#15803d" : "#dc2626"],
+            ["首逾率", pct(metrics.firstOverdueRate), metrics.firstOverdueRate <= 3 ? "#15803d" : "#dc2626"],
+            ["综合收益率", pct(totalPrincipal ? (totalRevenue/totalPrincipal)*100 : 0), "#7c3aed"],
+          ].map(([label, val, color]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:6px;background:#f8fafc">
+              <span style="color:#374151;font-size:13px">${label}</span>
+              <strong style="color:${color};font-size:15px">${val}</strong>
+            </div>
+          `).join("")}
+        </div>
+      </section>
+    </div>
+
+    <!-- 月度放款趋势 -->
+    ${months.length > 0 ? `
+    <section class="panel">
+      <div class="panel-head"><h2>📅 月度放款趋势</h2><span>按订单创建日期</span></div>
+      <div style="display:grid;gap:8px">
+        ${months.map(m => `
+          <div class="bar-row">
+            <div class="bar-top">
+              <strong>${m.month}</strong>
+              <span>${m.count} 笔 · ${money(m.principal)} 本金 · ${money(m.interest)} 利息</span>
+            </div>
+            <div class="bar-track" style="height:14px">
+              <div class="bar-fill" style="width:${Math.max((m.principal/maxMonth)*100,3)}%;height:100%;border-radius:999px;background:linear-gradient(90deg,#0f766e,#0d9488)"></div>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </section>` : ""}
+
+    <!-- 机构收益排行 -->
+    ${clinicRevenue.length > 0 ? `
+    <section class="panel">
+      <div class="panel-head"><h2>🏥 机构收益排行</h2><span>按预计总收益排序</span></div>
+      <div style="overflow-x:auto">
+        <table style="min-width:640px">
+          <thead><tr>
+            <th>机构</th><th>订单数</th><th>放款本金</th><th>利息收入</th><th>服务费</th><th>总收益</th><th>已回收</th><th>逾期</th><th>收益占比</th>
+          </tr></thead>
+          <tbody>
+            ${clinicRevenue.map((c, i) => `
+              <tr>
+                <td><b style="color:${colors[i%5]}">${c.name}</b></td>
+                <td>${c.orders}</td>
+                <td>${money(c.principal)}</td>
+                <td style="color:#0f766e">${money(c.interest)}</td>
+                <td style="color:#7c3aed">${money(c.fees)}</td>
+                <td><b style="color:#0284c7">${money(c.revenue)}</b></td>
+                <td style="color:#15803d">${money(c.collected)}</td>
+                <td style="color:${c.overdueCount>0?"#dc2626":"#15803d"}">${c.overdueCount} 笔</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div style="flex:1;height:8px;background:#edf2f5;border-radius:999px;overflow:hidden">
+                      <div style="width:${Math.max((c.revenue/maxRev)*100,2)}%;height:100%;background:${colors[i%5]};border-radius:999px"></div>
+                    </div>
+                    <span style="font-size:11px;color:#6b7280">${pct(totalRevenue?(c.revenue/totalRevenue)*100:0)}</span>
+                  </div>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>` : ""}
+
+    <!-- 项目分布 -->
+    ${treats.length > 0 ? `
+    <section class="panel">
+      <div class="panel-head"><h2>💄 热门医美项目 TOP5</h2><span>按放款本金排序</span></div>
+      <div style="display:grid;gap:10px">
+        ${treats.map(([name, data], i) => `
+          <div class="bar-row">
+            <div class="bar-top">
+              <strong style="color:${colors[i%5]}">${name}</strong>
+              <span>${data.count} 笔 · ${money(data.principal)}</span>
+            </div>
+            <div class="bar-track" style="height:12px">
+              <div style="width:${Math.max((data.principal/maxTreat)*100,3)}%;height:100%;background:${colors[i%5]};border-radius:999px"></div>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </section>` : ""}
   `;
 }
 
