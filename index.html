@@ -1188,8 +1188,13 @@ function renderRepayments() {
           <td>${item.customer}</td>
           <td>${item.index}/${order.term}</td>
           <td>${money(item.amount)}</td>
-          <td>${repaymentBadge(item.status)}</td>
-          <td>${item.status !== "paid" ? `<button class="primary tiny" data-action="pay" data-id="${item.orderId}">记一笔还款</button>` : ""}</td>
+          <td>
+            <select onchange="changeRepayStatus(this,'${item.orderId}',${item.index-1})" style="border:1.5px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;min-width:80px;color:${item.status==='paid'?'#166534':item.status==='overdue'?'#991b1b':'#92400e'}">
+              <option value="unpaid" ${item.status==="unpaid"?"selected":""}>未收</option>
+              <option value="paid" ${item.status==="paid"?"selected":""}>已还</option>
+              <option value="overdue" ${item.status==="overdue"?"selected":""}>逾期</option>
+            </select>
+          </td>
         </tr>
       `;
     })
@@ -1334,6 +1339,26 @@ async function addClinic(form) {
   });
   render();
   form.reset();
+  saveState();
+}
+
+function changeRepayStatus(select, orderId, periodIndex) {
+  const order = state.orders.find((item) => item.id === orderId);
+  if (!order) return;
+  const newStatus = select.value;
+  if (newStatus === "paid") {
+    // 标记该期已还，更新paidInstallments
+    order.paidInstallments = Math.max(order.paidInstallments, periodIndex + 1);
+    if (order.paidInstallments >= order.term) order.status = "closed";
+    else if (order.status === "overdue") order.status = "active";
+  } else if (newStatus === "overdue") {
+    order.status = "overdue";
+  } else if (newStatus === "unpaid") {
+    // 取消还款标记
+    if (order.paidInstallments > periodIndex) order.paidInstallments = periodIndex;
+    if (order.status === "closed") order.status = "active";
+  }
+  render();
   saveState();
 }
 
