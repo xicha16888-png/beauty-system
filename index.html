@@ -1348,9 +1348,9 @@ async function updateOrder(id, action) {
   if (action === "pay") {
     order.paidInstallments = Math.min(order.paidInstallments + 1, order.term);
     if (order.paidInstallments >= order.term) order.status = "closed";
-    if (order.status === "overdue" && order.paidInstallments < order.term) order.status = "active";
+    else if (order.status === "overdue") order.status = "active";
   }
-  saveState();
+  await saveState();
   render();
 }
 
