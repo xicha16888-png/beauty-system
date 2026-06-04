@@ -1154,12 +1154,13 @@ function renderOrders() {
         <td>${order.term}</td>
         <td>${statusBadge(order.status)}</td>
         <td>
-          <div class="action-cell">
-            ${order.status === "pending" ? `<button class="primary tiny" data-action="approve" data-id="${order.id}">通过</button>` : ""}
-            ${order.status === "active" ? `<button class="secondary tiny" data-action="overdue" data-id="${order.id}">标逾期</button>` : ""}
-            ${["active", "overdue"].includes(order.status) ? `<button class="secondary tiny" data-action="close" data-id="${order.id}">结清</button>` : ""}
-            ${order.status === "pending" ? `<button class="danger tiny" data-action="reject" data-id="${order.id}">拒绝</button>` : ""}
-          </div>
+          <select class="status-select" data-id="${order.id}" onchange="changeOrderStatus(this)" style="border:1.5px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;min-width:90px">
+            <option value="pending" ${order.status==="pending"?"selected":""}>待审核</option>
+            <option value="active" ${order.status==="active"?"selected":""}>还款中</option>
+            <option value="overdue" ${order.status==="overdue"?"selected":""}>逾期</option>
+            <option value="closed" ${order.status==="closed"?"selected":""}>已结清</option>
+            <option value="rejected" ${order.status==="rejected"?"selected":""}>已拒绝</option>
+          </select>
         </td>
       </tr>
     `)
@@ -1333,6 +1334,17 @@ async function addClinic(form) {
   });
   render();
   form.reset();
+  saveState();
+}
+
+function changeOrderStatus(select) {
+  const id = select.dataset.id;
+  const newStatus = select.value;
+  const order = state.orders.find((item) => item.id === id);
+  if (!order) return;
+  order.status = newStatus;
+  if (newStatus === "closed") order.paidInstallments = order.term;
+  render();
   saveState();
 }
 
