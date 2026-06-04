@@ -1277,7 +1277,8 @@ function kpiCard([label, value, note]) {
 }
 
 function statusBadge(status) {
-  return `<span class="status ${status}">${statusText[status]}</span>`;
+  const text = statusText[status] || status || "未知";
+  return `<span class="status ${status || "pending"}">${text}</span>`;
 }
 
 function repaymentBadge(status) {
@@ -1317,8 +1318,8 @@ async function addOrder(form) {
     paidInstallments: 0,
   };
   state.orders.unshift(order);
-  saveState();
   render();
+  saveState();
 }
 
 async function addClinic(form) {
@@ -1330,9 +1331,9 @@ async function addClinic(form) {
     city: data.city,
     limit: Number(data.limit),
   });
-  saveState();
-  form.reset();
   render();
+  form.reset();
+  saveState();
 }
 
 async function updateOrder(id, action) {
@@ -1350,8 +1351,8 @@ async function updateOrder(id, action) {
     if (order.paidInstallments >= order.term) order.status = "closed";
     else if (order.status === "overdue") order.status = "active";
   }
-  await saveState();
-  render();
+  render();  // 先更新界面
+  saveState(); // 后台保存，不阻塞UI
 }
 
 function exportCsv() {
