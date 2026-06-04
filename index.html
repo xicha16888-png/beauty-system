@@ -1240,7 +1240,8 @@ function renderReports() {
   const pendingOrders = state.orders.filter(o => o.status === "pending").length;
 
   // ── KPI 卡片 ──
-  document.getElementById("financeKpis").innerHTML = `
+  const kpiEl = document.getElementById("financeKpis");
+  if (kpiEl) kpiEl.innerHTML = `
     <div class="kpi" style="border-left:4px solid #0f766e">
       <span>💰 放款总额</span>
       <strong style="color:#0f766e">${money(totalPrincipal)}</strong>
@@ -1302,7 +1303,18 @@ function renderReports() {
   const colors = ["#0f766e","#7c3aed","#0284c7","#dc2626","#d97706"];
 
   const reportsEl = document.getElementById("financeReport");
-  if (reportsEl) reportsEl.innerHTML = `
+  if (!reportsEl) return;
+  if (funded.length === 0) {
+    reportsEl.innerHTML = `<section class="panel" style="text-align:center;padding:40px;color:#6b7280">
+      <div style="font-size:48px;margin-bottom:16px">📊</div>
+      <h2 style="color:#374151">暂无财务数据</h2>
+      <p>请先新建订单并审核通过，财务报表将自动生成</p>
+      <button class="primary" onclick="document.querySelector('[data-view=orders]').click()" style="margin-top:16px">去新建订单</button>
+    </section>`;
+    document.getElementById("financeKpis").innerHTML = "";
+    return;
+  }
+  reportsEl.innerHTML = `
     <!-- 收支总览表 -->
     <section class="panel">
       <div class="panel-head"><h2>📊 收支总览</h2><span>所有有效订单汇总</span></div>
