@@ -8,29 +8,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* 主色调：深夜蓝 + 玫瑰金 + 象牙 */
-  --bg: #0a0e1a;
-  --bg2: #0f1523;
-  --panel: rgba(255,255,255,0.04);
-  --panel-solid: #131929;
-  --border: rgba(255,255,255,0.08);
-  --border-hover: rgba(212,175,118,0.4);
-  --ink: #f0ede8;
-  --ink-soft: #a8a29e;
-  --muted: #6b7280;
+  --bg: #0d1117;
+  --bg2: #161b27;
+  --panel: #1c2333;
+  --panel-solid: #1c2333;
+  --border: rgba(255,255,255,0.10);
+  --border-hover: rgba(212,175,118,0.5);
+  --ink: #e8e6e1;
+  --ink-soft: #b0aaa0;
+  --muted: #7a7670;
   --gold: #d4af76;
   --gold-light: #e8c990;
-  --gold-dim: rgba(212,175,118,0.15);
+  --gold-dim: rgba(212,175,118,0.12);
   --rose: #e8a0a0;
-  --teal: #5eead4;
+  --teal: #4dd9c0;
   --red: #f87171;
   --green: #4ade80;
   --blue: #60a5fa;
   --amber: #fbbf24;
-  --sidebar-w: 240px;
-  --radius: 14px;
-  --shadow: 0 8px 32px rgba(0,0,0,0.4);
-  --shadow-gold: 0 0 24px rgba(212,175,118,0.15);
+  --sidebar-w: 220px;
+  --radius: 12px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.35);
   font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -40,18 +38,13 @@ body {
   background: var(--bg);
   color: var(--ink);
   min-height: 100vh;
-  /* 网格背景纹理 */
   background-image:
-    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(212,175,118,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(94,234,212,0.04) 0%, transparent 60%),
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(212,175,118,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(77,217,192,0.03) 0%, transparent 60%);
 }
 
 button, input, select, textarea { font: inherit; }
 
-/* ─── APP SHELL ─── */
 .app-shell {
   min-height: 100vh;
   display: grid;
@@ -62,17 +55,16 @@ button, input, select, textarea { font: inherit; }
 .sidebar {
   background: var(--bg2);
   border-right: 1px solid var(--border);
-  padding: 24px 16px;
+  padding: 20px 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   position: sticky;
   top: 0;
   height: 100vh;
   overflow-y: auto;
 }
 
-/* 金色顶部线 */
 .sidebar::before {
   content: '';
   position: absolute;
@@ -84,65 +76,44 @@ button, input, select, textarea { font: inherit; }
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 4px 20px;
+  gap: 11px;
+  padding: 6px 4px 18px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 8px;
 }
 
 .brand-mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 38px; height: 38px;
+  border-radius: 9px;
   background: linear-gradient(135deg, var(--gold), #b8943f);
   display: grid;
   place-items: center;
   font-weight: 800;
-  font-size: 18px;
-  color: #0a0e1a;
-  box-shadow: 0 4px 12px rgba(212,175,118,0.3);
+  font-size: 17px;
+  color: #0d1117;
   font-family: 'Playfair Display', serif;
 }
 
-.brand strong {
-  display: block;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--ink);
-  letter-spacing: 0.02em;
-}
+.brand strong { display: block; font-size: 14px; font-weight: 700; color: #f0ece4; }
+.brand span { display: block; font-size: 10px; color: var(--gold); margin-top: 2px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
 
-.brand span {
-  display: block;
-  font-size: 11px;
-  color: var(--gold);
-  margin-top: 2px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.8;
-}
-
-.nav { display: grid; gap: 3px; }
+.nav { display: grid; gap: 2px; }
 
 .nav-item {
   border: none;
-  color: var(--ink-soft);
+  color: #c8c2b8;
   background: transparent;
   text-align: left;
-  padding: 11px 14px;
-  border-radius: 10px;
+  padding: 10px 13px;
+  border-radius: 9px;
   cursor: pointer;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 500;
-  transition: all 0.2s;
+  transition: all 0.18s;
   position: relative;
-  letter-spacing: 0.01em;
 }
 
-.nav-item:hover {
-  background: var(--panel);
-  color: var(--ink);
-}
+.nav-item:hover { background: rgba(255,255,255,0.06); color: #f0ece4; }
 
 .nav-item.active {
   background: var(--gold-dim);
@@ -153,7 +124,7 @@ button, input, select, textarea { font: inherit; }
 .nav-item.active::before {
   content: '';
   position: absolute;
-  left: 0; top: 25%; bottom: 25%;
+  left: 0; top: 28%; bottom: 28%;
   width: 3px;
   border-radius: 0 2px 2px 0;
   background: var(--gold);
@@ -161,61 +132,39 @@ button, input, select, textarea { font: inherit; }
 
 .sidebar-foot {
   margin-top: auto;
-  padding-top: 16px;
+  padding-top: 14px;
   border-top: 1px solid var(--border);
-  color: var(--muted);
+  color: #7a7670;
   font-size: 11px;
   display: grid;
-  gap: 4px;
+  gap: 3px;
 }
 
-#syncStatus {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 6px;
-}
-
-#syncDot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--green);
-}
+#syncStatus { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #7a7670; margin-top: 4px; }
+#syncDot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
 
 /* ─── MAIN ─── */
-.main {
-  padding: 32px 36px;
-  min-width: 0;
-}
+.main { padding: 28px 32px; min-width: 0; }
 
-/* ─── TOPBAR ─── */
 .topbar {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 h1 {
   font-family: 'Playfair Display', serif;
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 700;
-  line-height: 1.2;
-  color: var(--ink);
+  color: #f0ece4;
   letter-spacing: -0.01em;
 }
 
-h2 {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--ink);
-  letter-spacing: 0.01em;
-}
+h2 { font-size: 14px; font-weight: 600; color: #e8e4de; letter-spacing: 0.01em; }
 
-.topbar p { color: var(--ink-soft); margin-top: 6px; font-size: 13px; }
+.topbar p { color: var(--ink-soft); margin-top: 5px; font-size: 13px; }
 .panel-head span { color: var(--ink-soft); font-size: 12px; }
 .dialog-head p { color: var(--ink-soft); font-size: 13px; margin-top: 4px; }
 
@@ -224,67 +173,49 @@ h2 {
 /* ─── BUTTONS ─── */
 button {
   border: none;
-  border-radius: 10px;
-  min-height: 40px;
-  padding: 0 18px;
+  border-radius: 9px;
+  min-height: 38px;
+  padding: 0 16px;
   cursor: pointer;
   white-space: nowrap;
   font-weight: 600;
-  transition: all 0.2s;
-  letter-spacing: 0.01em;
+  transition: all 0.18s;
 }
 
 .primary {
   background: linear-gradient(135deg, var(--gold), #b8943f);
-  color: #0a0e1a;
+  color: #0d1117;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(212,175,118,0.25);
+  box-shadow: 0 3px 12px rgba(212,175,118,0.3);
 }
 
-.primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(212,175,118,0.35);
-}
+.primary:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(212,175,118,0.4); }
 
 .secondary {
-  background: var(--panel);
+  background: rgba(255,255,255,0.07);
   border: 1px solid var(--border);
-  color: var(--ink-soft);
+  color: #c8c2b8;
 }
 
-.secondary:hover {
-  border-color: var(--gold);
-  color: var(--gold);
-}
+.secondary:hover { border-color: var(--gold); color: var(--gold); }
 
-.danger {
-  background: rgba(248,113,113,0.1);
-  border: 1px solid rgba(248,113,113,0.3);
-  color: var(--red);
-}
+.danger { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: #fca5a5; }
 
 /* ─── VIEWS ─── */
 .view { display: none; }
-.view.active { display: grid; gap: 20px; }
+.view.active { display: grid; gap: 18px; }
 
-/* ─── KPI GRID ─── */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
-  gap: 16px;
-}
-
-.kpi-grid.compact {
-  grid-template-columns: repeat(3, minmax(160px, 1fr));
-}
+/* ─── KPI ─── */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 14px; }
+.kpi-grid.compact { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
 
 .kpi {
-  background: var(--panel-solid);
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 18px;
   box-shadow: var(--shadow);
-  min-height: 110px;
+  min-height: 105px;
   display: grid;
   align-content: space-between;
   position: relative;
@@ -292,59 +223,49 @@ button {
   transition: border-color 0.2s;
 }
 
-.kpi::before {
+.kpi::after {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
-  opacity: 0.4;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,118,0.5), transparent);
 }
 
-.kpi:hover { border-color: var(--border-hover); }
+.kpi:hover { border-color: rgba(212,175,118,0.35); }
 
-.kpi span { color: var(--ink-soft); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 600; }
-.kpi strong { font-size: 28px; font-weight: 700; margin-top: 8px; font-family: 'Playfair Display', serif; }
-.kpi small { color: var(--muted); font-size: 11px; }
+.kpi span { color: #a09a92; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 600; }
+.kpi strong { font-size: 26px; font-weight: 700; margin-top: 6px; color: #f0ece4; font-family: 'Playfair Display', serif; }
+.kpi small { color: #7a7670; font-size: 11px; }
 
 /* ─── SPLIT GRID ─── */
 .split-grid, .rule-grid, .clinic-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
-  gap: 20px;
+  gap: 18px;
 }
 
 /* ─── PANEL ─── */
 .panel {
-  background: var(--panel-solid);
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 20px;
+  padding: 18px;
   min-width: 0;
-  transition: border-color 0.2s;
 }
-
-.panel:hover { border-color: rgba(212,175,118,0.2); }
 
 .panel-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 16px;
-  padding-bottom: 14px;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
 }
 
 /* ─── TABLE ─── */
 .table-wrap { width: 100%; overflow-x: auto; }
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 820px;
-}
+table { width: 100%; border-collapse: collapse; min-width: 820px; }
 
 th {
   text-align: left;
@@ -354,218 +275,143 @@ th {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
+  background: rgba(212,175,118,0.04);
 }
 
 td {
   text-align: left;
-  padding: 13px 12px;
-  border-bottom: 1px solid var(--border);
-  font-size: 13.5px;
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 13px;
   vertical-align: middle;
-  color: var(--ink);
+  color: #ddd8d0;
 }
 
 tr:last-child td { border-bottom: none; }
-
 tr:hover td { background: rgba(212,175,118,0.03); }
 
-/* ─── FILTERS ─── */
+/* ─── INPUT / SELECT ─── */
 .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
 
 input, select, textarea {
   width: 100%;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 9px;
-  padding: 10px 13px;
-  background: var(--panel-solid);
-  color: var(--ink);
-  min-height: 40px;
-  transition: border-color 0.2s;
-  font-size: 13.5px;
+  padding: 9px 12px;
+  background: rgba(255,255,255,0.06);
+  color: #e8e4de;
+  min-height: 38px;
+  transition: border-color 0.18s;
+  font-size: 13px;
 }
 
+input::placeholder { color: #6a6560; }
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(212,175,118,0.1);
+  box-shadow: 0 0 0 3px rgba(212,175,118,0.12);
+  background: rgba(255,255,255,0.08);
 }
 
-.filters input { max-width: 320px; }
-.filters select { max-width: 180px; }
+select option { background: #1c2333; color: #e8e4de; }
 
-select option { background: #1a2235; color: var(--ink); }
+.filters input { max-width: 300px; }
+.filters select { max-width: 170px; }
 
-/* ─── STATUS BADGES ─── */
+/* 操作列下拉菜单特殊处理 */
+.status-select {
+  background: rgba(255,255,255,0.08) !important;
+  color: #e8e4de !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  font-weight: 600;
+}
+
+/* ─── STATUS ─── */
 .status {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
-  padding: 0 10px;
+  min-height: 22px;
+  padding: 0 9px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
-.status.pending { background: rgba(251,191,36,0.12); color: var(--amber); border: 1px solid rgba(251,191,36,0.25); }
-.status.active { background: rgba(74,222,128,0.1); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
-.status.overdue { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
-.status.closed { background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
-.status.rejected { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+.status.pending { background: rgba(251,191,36,0.15); color: #fcd34d; border: 1px solid rgba(251,191,36,0.3); }
+.status.active { background: rgba(74,222,128,0.12); color: #6ee7a0; border: 1px solid rgba(74,222,128,0.25); }
+.status.overdue { background: rgba(248,113,113,0.12); color: #fca5a5; border: 1px solid rgba(248,113,113,0.3); }
+.status.closed { background: rgba(96,165,250,0.12); color: #93c5fd; border: 1px solid rgba(96,165,250,0.25); }
+.status.rejected { background: rgba(255,255,255,0.06); color: #9ca3af; border: 1px solid rgba(255,255,255,0.1); }
 
-/* ─── BAR LIST ─── */
+/* ─── BAR ─── */
 .bar-list, .compact-list, .clinic-cards { display: grid; gap: 12px; }
-
 .bar-row { display: grid; gap: 8px; }
-
 .bar-top, .list-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
-.bar-track {
-  height: 8px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 999px;
-  overflow: hidden;
-}
+.bar-track { height: 7px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 999px; }
 
-.bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--gold), var(--gold-light));
-  border-radius: 999px;
-}
+.list-row { border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; transition: border-color 0.18s; }
+.list-row:hover { border-color: rgba(212,175,118,0.35); }
+.list-row strong { display: block; font-size: 13px; color: #e8e4de; }
+.list-row span, .meta { color: #908a82; font-size: 12px; margin-top: 3px; }
 
-.list-row {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 13px 15px;
-  transition: border-color 0.2s;
-}
+.risk-score { min-width: 42px; height: 32px; border-radius: 7px; display: grid; place-items: center; font-weight: 800; font-size: 13px; background: rgba(77,217,192,0.1); color: var(--teal); border: 1px solid rgba(77,217,192,0.2); }
+.risk-score.high { background: rgba(248,113,113,0.12); color: #fca5a5; border-color: rgba(248,113,113,0.3); }
+.risk-score.medium { background: rgba(251,191,36,0.12); color: #fcd34d; border-color: rgba(251,191,36,0.25); }
 
-.list-row:hover { border-color: var(--border-hover); }
-
-.list-row strong { display: block; font-size: 13.5px; }
-.list-row span, .meta { color: var(--ink-soft); font-size: 12px; margin-top: 3px; }
-
-.risk-score {
-  min-width: 44px;
-  height: 34px;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  font-weight: 800;
-  font-size: 14px;
-  background: rgba(94,234,212,0.1);
-  color: var(--teal);
-  border: 1px solid rgba(94,234,212,0.2);
-}
-
-.risk-score.high { background: rgba(248,113,113,0.1); color: var(--red); border-color: rgba(248,113,113,0.25); }
-.risk-score.medium { background: rgba(251,191,36,0.1); color: var(--amber); border-color: rgba(251,191,36,0.2); }
-
-/* ─── CLINIC CARDS ─── */
-.clinic-card {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-  display: grid;
-  gap: 12px;
-  background: var(--panel-solid);
-  transition: border-color 0.2s;
-}
-
-.clinic-card:hover { border-color: var(--border-hover); }
+/* ─── CLINIC ─── */
+.clinic-card { border: 1px solid var(--border); border-radius: 11px; padding: 15px; display: grid; gap: 11px; background: var(--panel); transition: border-color 0.2s; }
+.clinic-card:hover { border-color: rgba(212,175,118,0.35); }
 .clinic-card header { display: flex; justify-content: space-between; gap: 10px; }
-
 .clinic-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-
-.clinic-stats div {
-  background: rgba(255,255,255,0.03);
-  border-radius: 8px;
-  padding: 10px;
-  border: 1px solid var(--border);
-}
-
-.clinic-stats span { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
-.clinic-stats strong { display: block; margin-top: 4px; font-size: 15px; }
+.clinic-stats div { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 9px; border: 1px solid var(--border); }
+.clinic-stats span { color: #7a7670; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+.clinic-stats strong { display: block; margin-top: 3px; font-size: 14px; color: #e8e4de; }
 
 /* ─── FORM ─── */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(220px, 1fr));
-  gap: 16px;
-}
-
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(200px, 1fr)); gap: 15px; }
 .form-grid.single { grid-template-columns: 1fr; }
 
-label {
-  display: grid;
-  gap: 8px;
-  color: var(--ink-soft);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
+label { display: grid; gap: 7px; color: #a09a92; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
 
-.notes { margin-top: 16px; }
+.notes { margin-top: 14px; }
 .full { width: 100%; }
 
-.rule-list {
-  margin: 0;
-  padding-left: 20px;
-  display: grid;
-  gap: 14px;
-  color: var(--ink-soft);
-  font-size: 13.5px;
-  line-height: 1.6;
-}
+.rule-list { margin: 0; padding-left: 18px; display: grid; gap: 12px; color: #c8c2b8; font-size: 13px; line-height: 1.6; }
 
 /* ─── DIALOG ─── */
 dialog {
-  width: min(900px, calc(100vw - 28px));
-  border: 1px solid var(--border);
-  border-radius: 18px;
+  width: min(880px, calc(100vw - 28px));
+  border: 1px solid rgba(212,175,118,0.2);
+  border-radius: 16px;
   padding: 0;
-  background: var(--panel-solid);
-  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  background: #1a2235;
+  box-shadow: 0 20px 70px rgba(0,0,0,0.7);
   color: var(--ink);
 }
 
-dialog::backdrop { background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
+dialog::backdrop { background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); }
 
-#orderForm { padding: 28px; }
+#orderForm { padding: 24px; }
 
-.dialog-head, .dialog-actions {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
+.dialog-head, .dialog-actions { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.dialog-head { margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.dialog-actions { align-items: center; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--border); }
 
-.dialog-head { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-.dialog-actions { align-items: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
-
-.icon-btn {
-  width: 38px; padding: 0;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  color: var(--ink-soft);
-  font-size: 20px;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-
+.icon-btn { width: 36px; padding: 0; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #a09a92; font-size: 19px; border-radius: 7px; transition: all 0.18s; }
 .icon-btn:hover { border-color: var(--red); color: var(--red); }
 
 .action-cell { display: flex; gap: 8px; flex-wrap: wrap; }
-
-.tiny { min-height: 30px; padding: 0 10px; font-size: 12px; border-radius: 7px; }
+.tiny { min-height: 28px; padding: 0 9px; font-size: 12px; border-radius: 6px; }
 
 /* ─── SCROLLBAR ─── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(212,175,118,0.2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(212,175,118,0.4); }
+::-webkit-scrollbar-thumb { background: rgba(212,175,118,0.25); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(212,175,118,0.45); }
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 980px) {
@@ -573,18 +419,18 @@ dialog::backdrop { background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
   .sidebar { position: static; height: auto; }
   .nav { grid-template-columns: repeat(3, 1fr); }
   .split-grid, .rule-grid, .clinic-layout, .kpi-grid, .kpi-grid.compact { grid-template-columns: 1fr; }
-  .main { padding: 20px; }
+  .main { padding: 18px; }
 }
 
 @media (max-width: 640px) {
-  .main { padding: 16px; }
+  .main { padding: 14px; }
   .topbar, .dialog-head, .dialog-actions { display: grid; }
   .top-actions { justify-content: stretch; }
   .top-actions button, .dialog-actions button { width: 100%; }
   .nav { grid-template-columns: repeat(2, 1fr); }
   .form-grid { grid-template-columns: 1fr; }
   .filters input, .filters select { max-width: none; }
-  h1 { font-size: 24px; }
+  h1 { font-size: 22px; }
 }
 </style>
   </head>
@@ -1119,14 +965,14 @@ function renderOrders() {
         <td>${statusBadge(order.status)}</td>
         <td>
           <div style="display:flex;align-items:center;gap:6px">
-            <select class="status-select" data-id="${order.id}" onchange="changeOrderStatus(this)" style="border:1.5px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;min-width:90px">
+            <select class="status-select" data-id="${order.id}" onchange="changeOrderStatus(this)" class="status-select" style="border-radius:6px;padding:5px 8px;font-size:12px;cursor:pointer;min-width:90px">
               <option value="pending" ${order.status==="pending"?"selected":""}>待审核</option>
               <option value="active" ${order.status==="active"?"selected":""}>还款中</option>
               <option value="overdue" ${order.status==="overdue"?"selected":""}>逾期</option>
               <option value="closed" ${order.status==="closed"?"selected":""}>已结清</option>
               <option value="rejected" ${order.status==="rejected"?"selected":""}>已拒绝</option>
             </select>
-            <button onclick="deleteOrder('${order.id}')" title="删除订单" style="background:#fee2e2;color:#991b1b;border:none;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:13px;font-weight:700;flex-shrink:0" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">🗑</button>
+            <button onclick="deleteOrder('${order.id}')" title="删除订单" style="background:rgba(248,113,113,0.1);color:#fca5a5;border:none;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:13px;font-weight:700;flex-shrink:0" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">🗑</button>
           </div>
         </td>
       </tr>
@@ -1204,10 +1050,10 @@ function renderRepayments() {
         ["📅 本月应收", thisMonthItems.length, money(thisMonthDue), "#0284c7", "#e0f2fe", "thisMonth"],
         ["✅ 已收期数", paidItems.length, money(paidAmt), "#0f766e", "#f0fdf4", "all"],
       ].map(([label, val, amt, color, bg, tab]) => `
-        <div onclick="switchRepayTab('${tab}')" style="background:#fff;border-radius:10px;padding:16px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,.06);border-left:4px solid ${color};cursor:pointer;transition:.15s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+        <div onclick="switchRepayTab('${tab}')" style="background:rgba(255,255,255,0.02);border-radius:10px;padding:16px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,.06);border-left:4px solid ${color};cursor:pointer;transition:.15s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
           <div style="font-size:12px;color:${color};font-weight:700">${label}</div>
           <div style="font-size:28px;font-weight:800;color:${color};margin:6px 0">${val}</div>
-          <div style="font-size:12px;color:#6b7280">${amt}</div>
+          <div style="font-size:12px;color:#908a82">${amt}</div>
         </div>
       `).join("")}
     </div>
@@ -1233,7 +1079,7 @@ function renderRepayments() {
 
     <!-- 客户分组卡片 -->
     ${groupList.length === 0 ? `
-      <div style="text-align:center;padding:50px;color:#6b7280;background:#fff;border-radius:10px;border:1px solid #e5e7eb">
+      <div style="text-align:center;padding:50px;color:#908a82;background:#fff;border-radius:10px;border:1px solid #e5e7eb">
         <div style="font-size:40px;margin-bottom:12px">${_repaySearch?"🔍":"✅"}</div>
         <div style="font-size:15px">${_repaySearch?"没有找到匹配记录":"这个分类暂无记录"}</div>
       </div>
@@ -1249,7 +1095,7 @@ function renderRepayments() {
       const paidCount = group.items.filter(i=>i.status==="paid").length;
 
       return `
-        <div style="background:#fff;border-radius:12px;border:1px solid #e5e7eb;border-left:4px solid ${borderColor};margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05)">
+        <div style="background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid #e5e7eb;border-left:4px solid ${borderColor};margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05)">
           <!-- 客户卡片头部（点击展开/收起）-->
           <div onclick="_repayExpanded['${group.orderId}']=!(_repayExpanded['${group.orderId}']!==false);renderRepayments()"
             style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;background:${hasOverdue?'#fff5f5':allPaid?'#f0fdf4':'#fffbeb'}">
@@ -1258,29 +1104,29 @@ function renderRepayments() {
                 ${group.customer.charAt(0).toUpperCase()}
               </div>
               <div>
-                <div style="font-weight:800;font-size:15px;color:#1f2937">${group.customer}
-                  ${hasOverdue?'<span style="background:#fee2e2;color:#991b1b;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:700">逾期</span>':''}
-                  ${allPaid?'<span style="background:#dcfce7;color:#15803d;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:700">已结清</span>':''}
+                <div style="font-weight:800;font-size:15px;color:#e8e4de">${group.customer}
+                  ${hasOverdue?'<span style="background:rgba(248,113,113,0.1);color:#fca5a5;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:700">逾期</span>':''}
+                  ${allPaid?'<span style="background:rgba(74,222,128,0.1);color:#4ade80;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:700">已结清</span>':''}
                 </div>
-                <div style="font-size:12px;color:#6b7280;margin-top:2px">${group.orderId} · ${group.treatment} · ${group.items.length}期</div>
+                <div style="font-size:12px;color:#908a82;margin-top:2px">${group.orderId} · ${group.treatment} · ${group.items.length}期</div>
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:20px">
               <div style="text-align:right">
-                <div style="font-size:11px;color:#6b7280">已还/待还</div>
+                <div style="font-size:11px;color:#908a82">已还/待还</div>
                 <div style="font-weight:700;font-size:13px"><span style="color:#0f766e">${money(paidAmt2)}</span> / <span style="color:${hasOverdue?'#dc2626':'#d97706'}">${money(unpaidAmt)}</span></div>
               </div>
               <div style="text-align:right">
-                <div style="font-size:11px;color:#6b7280">还款进度</div>
-                <div style="font-size:12px;font-weight:700;color:#374151">${paidCount}/${group.items.length}期</div>
+                <div style="font-size:11px;color:#908a82">还款进度</div>
+                <div style="font-size:12px;font-weight:700;color:#e0dbd4">${paidCount}/${group.items.length}期</div>
               </div>
               <div style="width:60px">
                 <div style="height:6px;background:#e5e7eb;border-radius:999px;overflow:hidden">
                   <div style="width:${progress}%;height:100%;background:${allPaid?'#0f766e':hasOverdue?'#dc2626':'#d97706'};border-radius:999px"></div>
                 </div>
-                <div style="font-size:10px;color:#6b7280;text-align:center;margin-top:2px">${Math.round(progress)}%</div>
+                <div style="font-size:10px;color:#908a82;text-align:center;margin-top:2px">${Math.round(progress)}%</div>
               </div>
-              <div style="font-size:18px;color:#9ca3af;transition:.2s;transform:${expanded?'rotate(180deg)':'rotate(0deg)'}">▼</div>
+              <div style="font-size:18px;color:#b0aaa0;transition:.2s;transform:${expanded?'rotate(180deg)':'rotate(0deg)'}">▼</div>
             </div>
           </div>
 
@@ -1289,12 +1135,12 @@ function renderRepayments() {
           <div style="border-top:1px solid #f3f4f6">
             <table style="width:100%;border-collapse:collapse">
               <thead>
-                <tr style="background:#f8fafc">
-                  <th style="padding:8px 18px;font-size:11px;color:#6b7280;font-weight:700;text-align:left">期数</th>
-                  <th style="padding:8px 12px;font-size:11px;color:#6b7280;font-weight:700;text-align:left">到期日</th>
-                  <th style="padding:8px 12px;font-size:11px;color:#6b7280;font-weight:700;text-align:left">应收</th>
-                  <th style="padding:8px 12px;font-size:11px;color:#6b7280;font-weight:700;text-align:left">逾期天数</th>
-                  <th style="padding:8px 12px;font-size:11px;color:#6b7280;font-weight:700;text-align:left">状态</th>
+                <tr style="background:rgba(255,255,255,0.03)">
+                  <th style="padding:8px 18px;font-size:11px;color:#908a82;font-weight:700;text-align:left">期数</th>
+                  <th style="padding:8px 12px;font-size:11px;color:#908a82;font-weight:700;text-align:left">到期日</th>
+                  <th style="padding:8px 12px;font-size:11px;color:#908a82;font-weight:700;text-align:left">应收</th>
+                  <th style="padding:8px 12px;font-size:11px;color:#908a82;font-weight:700;text-align:left">逾期天数</th>
+                  <th style="padding:8px 12px;font-size:11px;color:#908a82;font-weight:700;text-align:left">状态</th>
                 </tr>
               </thead>
               <tbody>
@@ -1304,11 +1150,11 @@ function renderRepayments() {
                   const rowBg = item.status==="paid"?"#f0fdf4":isOv?"#fff5f5":"#fff";
                   return `
                     <tr style="background:${rowBg};border-bottom:1px solid #f9fafb">
-                      <td style="padding:10px 18px;font-weight:700;color:#374151">第 ${item.index} 期</td>
+                      <td style="padding:10px 18px;font-weight:700;color:#e0dbd4">第 ${item.index} 期</td>
                       <td style="padding:10px 12px;font-size:13px;color:${isOv?'#dc2626':'#374151'};font-weight:${isOv?700:400}">${item.dueDate}</td>
                       <td style="padding:10px 12px;font-weight:700;color:${isOv?'#dc2626':item.status==='paid'?'#0f766e':'#d97706'}">${money(item.amount)}</td>
                       <td style="padding:10px 12px">
-                        ${days>0?`<span style="background:#fee2e2;color:#991b1b;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700">逾期 ${days} 天</span>`:'<span style="color:#9ca3af;font-size:12px">—</span>'}
+                        ${days>0?`<span style="background:rgba(248,113,113,0.1);color:#fca5a5;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700">逾期 ${days} 天</span>`:'<span style="color:#b0aaa0;font-size:12px">—</span>'}
                       </td>
                       <td style="padding:10px 12px">
                         <select onchange="changeRepayStatus(this,'${item.orderId}',${item.index-1})"
@@ -1389,12 +1235,12 @@ function renderReports() {
     </div>
     <div class="kpi" style="border-left:4px solid #0284c7">
       <span>✅ 已回收金额</span>
-      <strong style="color:#0284c7">${money(totalCollected)}</strong>
+      <strong style="color:#60a5fa">${money(totalCollected)}</strong>
       <small>回收率 ${pct(collectionRate)}</small>
     </div>
     <div class="kpi" style="border-left:4px solid #dc2626">
       <span>⏳ 待回收余额</span>
-      <strong style="color:#dc2626">${money(metrics.outstanding)}</strong>
+      <strong style="color:#f87171">${money(metrics.outstanding)}</strong>
       <small>${overdue.length} 笔逾期 · ${active.length} 笔还款中</small>
     </div>
   `;
@@ -1440,9 +1286,9 @@ function renderReports() {
   const reportsEl = document.getElementById("financeReport");
   if (!reportsEl) return;
   if (funded.length === 0) {
-    reportsEl.innerHTML = `<section class="panel" style="text-align:center;padding:40px;color:#6b7280">
+    reportsEl.innerHTML = `<section class="panel" style="text-align:center;padding:40px;color:#908a82">
       <div style="font-size:48px;margin-bottom:16px">📊</div>
-      <h2 style="color:#374151">暂无财务数据</h2>
+      <h2 style="color:#e0dbd4">暂无财务数据</h2>
       <p>请先新建订单并审核通过，财务报表将自动生成</p>
       <button class="primary" onclick="document.querySelector('[data-view=orders]').click()" style="margin-top:16px">去新建订单</button>
     </section>`;
@@ -1459,40 +1305,40 @@ function renderReports() {
             <th>科目</th><th>金额</th><th>占比</th><th>说明</th>
           </tr></thead>
           <tbody>
-            <tr style="background:#f0fdf4">
-              <td><b style="color:#15803d">📥 放款本金</b></td>
-              <td><b style="color:#15803d">${money(totalPrincipal)}</b></td>
-              <td>—</td><td style="color:#6b7280;font-size:12px">${funded.length} 笔有效订单</td>
+            <tr style="background:rgba(74,222,128,0.06)">
+              <td><b style="color:#4ade80">📥 放款本金</b></td>
+              <td><b style="color:#4ade80">${money(totalPrincipal)}</b></td>
+              <td>—</td><td style="color:#908a82;font-size:12px">${funded.length} 笔有效订单</td>
             </tr>
             <tr>
               <td>📈 利息收入（预计）</td>
               <td>${money(totalInterest)}</td>
               <td>${pct(totalPrincipal ? (totalInterest/totalPrincipal)*100 : 0)}</td>
-              <td style="color:#6b7280;font-size:12px">按完整期限计算</td>
+              <td style="color:#908a82;font-size:12px">按完整期限计算</td>
             </tr>
             <tr>
               <td>🏥 机构服务费</td>
               <td>${money(totalFees)}</td>
               <td>${pct(totalPrincipal ? (totalFees/totalPrincipal)*100 : 0)}</td>
-              <td style="color:#6b7280;font-size:12px">按本金比例收取</td>
+              <td style="color:#908a82;font-size:12px">按本金比例收取</td>
             </tr>
-            <tr style="background:#f0f9ff">
-              <td><b style="color:#0284c7">💵 总收益（预计）</b></td>
-              <td><b style="color:#0284c7">${money(totalRevenue)}</b></td>
+            <tr style="background:rgba(96,165,250,0.06)">
+              <td><b style="color:#60a5fa">💵 总收益（预计）</b></td>
+              <td><b style="color:#60a5fa">${money(totalRevenue)}</b></td>
               <td><b>${pct(totalPrincipal ? (totalRevenue/totalPrincipal)*100 : 0)}</b></td>
-              <td style="color:#6b7280;font-size:12px">利息 + 服务费</td>
+              <td style="color:#908a82;font-size:12px">利息 + 服务费</td>
             </tr>
-            <tr style="background:#fffbeb">
+            <tr style="background:rgba(251,191,36,0.08)">
               <td>✅ 已回收（含本金+利息）</td>
               <td>${money(totalCollected)}</td>
               <td>${pct(collectionRate)}</td>
-              <td style="color:#6b7280;font-size:12px">实际到账金额</td>
+              <td style="color:#908a82;font-size:12px">实际到账金额</td>
             </tr>
-            <tr style="background:#fef2f2">
-              <td><b style="color:#dc2626">⏳ 待回收余额</b></td>
-              <td><b style="color:#dc2626">${money(metrics.outstanding)}</b></td>
+            <tr style="background:rgba(248,113,113,0.08)">
+              <td><b style="color:#f87171">⏳ 待回收余额</b></td>
+              <td><b style="color:#f87171">${money(metrics.outstanding)}</b></td>
               <td>${pct((totalPrincipal+totalInterest) ? (metrics.outstanding/(totalPrincipal+totalInterest))*100 : 0)}</td>
-              <td style="color:#6b7280;font-size:12px">${overdue.length} 笔逾期需催收</td>
+              <td style="color:#908a82;font-size:12px">${overdue.length} 笔逾期需催收</td>
             </tr>
           </tbody>
         </table>
@@ -1510,13 +1356,13 @@ function renderReports() {
             ["逾期", overdue.length, state.orders.filter(o=>o.status==="overdue").length, "#dc2626", "overdue"],
             ["待审核", 0, pendingOrders, "#d97706", "pending"],
           ].map(([label, _, count, color, cls]) => `
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;background:#f8fafc;border-left:3px solid ${color}">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border-left:3px solid ${color}">
               <div style="display:flex;align-items:center;gap:10px">
                 <span class="status ${cls}">${label}</span>
               </div>
               <div style="text-align:right">
                 <strong style="color:${color};font-size:20px">${count}</strong>
-                <div style="font-size:11px;color:#6b7280">笔</div>
+                <div style="font-size:11px;color:#908a82">笔</div>
               </div>
             </div>
           `).join("")}
@@ -1534,8 +1380,8 @@ function renderReports() {
             ["首逾率", pct(metrics.firstOverdueRate), metrics.firstOverdueRate <= 3 ? "#15803d" : "#dc2626"],
             ["综合收益率", pct(totalPrincipal ? (totalRevenue/totalPrincipal)*100 : 0), "#7c3aed"],
           ].map(([label, val, color]) => `
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:6px;background:#f8fafc">
-              <span style="color:#374151;font-size:13px">${label}</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:6px;background:rgba(255,255,255,0.03)">
+              <span style="color:#e0dbd4;font-size:13px">${label}</span>
               <strong style="color:${color};font-size:15px">${val}</strong>
             </div>
           `).join("")}
@@ -1579,15 +1425,15 @@ function renderReports() {
                 <td>${money(c.principal)}</td>
                 <td style="color:#0f766e">${money(c.interest)}</td>
                 <td style="color:#7c3aed">${money(c.fees)}</td>
-                <td><b style="color:#0284c7">${money(c.revenue)}</b></td>
-                <td style="color:#15803d">${money(c.collected)}</td>
+                <td><b style="color:#60a5fa">${money(c.revenue)}</b></td>
+                <td style="color:#4ade80">${money(c.collected)}</td>
                 <td style="color:${c.overdueCount>0?"#dc2626":"#15803d"}">${c.overdueCount} 笔</td>
                 <td>
                   <div style="display:flex;align-items:center;gap:6px">
                     <div style="flex:1;height:8px;background:#edf2f5;border-radius:999px;overflow:hidden">
                       <div style="width:${Math.max((c.revenue/maxRev)*100,2)}%;height:100%;background:${colors[i%5]};border-radius:999px"></div>
                     </div>
-                    <span style="font-size:11px;color:#6b7280">${pct(totalRevenue?(c.revenue/totalRevenue)*100:0)}</span>
+                    <span style="font-size:11px;color:#908a82">${pct(totalRevenue?(c.revenue/totalRevenue)*100:0)}</span>
                   </div>
                 </td>
               </tr>
@@ -1679,7 +1525,7 @@ function renderRisk() {
             <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;background:${alert?'#fff7f7':'#f8fafc'};border:1px solid ${alert?'#fecaca':'#e5e7eb'}">
               <div>
                 <div style="font-weight:700;font-size:13px;color:${alert?color:'#374151'}">${label}</div>
-                <div style="font-size:11px;color:#6b7280;margin-top:2px">${desc}</div>
+                <div style="font-size:11px;color:#908a82;margin-top:2px">${desc}</div>
               </div>
               <div style="font-size:22px;font-weight:800;color:${alert?color:'#9ca3af'};min-width:36px;text-align:right">${count}</div>
             </div>
@@ -1696,21 +1542,21 @@ function renderRisk() {
             const limitColor = c.used > 90 ? "#dc2626" : c.used > 70 ? "#d97706" : "#0f766e";
             const overdueColor = c.overdueRate > 15 ? "#dc2626" : c.overdueRate > 8 ? "#d97706" : "#15803d";
             return `
-              <div style="padding:10px 12px;border-radius:8px;background:#f8fafc;border:1px solid #e5e7eb">
+              <div style="padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid #e5e7eb">
                 <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-                  <strong style="font-size:13px">${c.name}</strong>
+                  <strong style="font-size:13px;color:#e8e4de">${c.name}</strong>
                   <span style="font-size:12px;color:${overdueColor};font-weight:700">逾期率 ${pct(c.overdueRate)}</span>
                 </div>
-                <div style="font-size:11px;color:#6b7280;margin-bottom:6px">${c.orders}笔 · 放款${money(c.principal)} / 限额${money(c.limit)}</div>
+                <div style="font-size:11px;color:#908a82;margin-bottom:6px">${c.orders}笔 · 放款${money(c.principal)} / 限额${money(c.limit)}</div>
                 <div style="display:flex;align-items:center;gap:8px">
                   <div style="flex:1;height:8px;background:#edf2f5;border-radius:999px;overflow:hidden">
                     <div style="width:${limitPct}%;height:100%;background:${limitColor};border-radius:999px;transition:.3s"></div>
                   </div>
                   <span style="font-size:11px;font-weight:700;color:${limitColor}">${pct(c.used)}</span>
                 </div>
-                ${c.overdueRate > 8 ? `<div style="margin-top:6px;font-size:11px;color:#dc2626;font-weight:600">⚠️ 首逾率超标，建议暂停放量</div>` : ""}
+                ${c.overdueRate > 8 ? `<div style="margin-top:6px;font-size:11px;color:#f87171;font-weight:600">⚠️ 首逾率超标，建议暂停放量</div>` : ""}
               </div>`;
-          }).join("") : '<div style="color:#6b7280;text-align:center;padding:20px">暂无机构数据</div>'}
+          }).join("") : '<div style="color:#908a82;text-align:center;padding:20px">暂无机构数据</div>'}
         </div>
       </section>
     </div>
@@ -1736,20 +1582,20 @@ function renderRisk() {
               const factors = (o._riskFactors||[]).filter(f=>f.level==="high").map(f=>f.label).slice(0,2).join("、")||"—";
               return `<tr>
                 <td><span style="background:${scoreBg};color:${scoreColor};padding:4px 10px;border-radius:20px;font-weight:800;font-size:13px">${score}</span></td>
-                <td><b>${o.customer}</b><div style="font-size:11px;color:#6b7280">${o.phone||""}</div></td>
+                <td><b>${o.customer}</b><div style="font-size:11px;color:#908a82">${o.phone||""}</div></td>
                 <td style="font-size:12px">${getClinic(o.clinicId).name}</td>
                 <td style="font-size:12px">${o.treatment}</td>
                 <td style="font-weight:700">${money(o.principal)}</td>
-                <td style="color:${parseFloat(dpRatio)<20?"#dc2626":"#374151"};font-weight:600">${dpRatio}</td>
-                <td style="color:${parseFloat(burden)>35?"#dc2626":"#374151"};font-weight:600">${burden}</td>
-                <td>${o.videoConfirmed==="yes"?'<span style="color:#15803d;font-weight:700">✅ 已确认</span>':'<span style="color:#dc2626;font-weight:700">❌ 未确认</span>'}</td>
+                <td style="color:${parseFloat(dpRatio)<20?"#f87171":"#e0dbd4"};font-weight:600">${dpRatio}</td>
+                <td style="color:${parseFloat(burden)>35?"#f87171":"#e0dbd4"};font-weight:600">${burden}</td>
+                <td>${o.videoConfirmed==="yes"?'<span style="color:#4ade80;font-weight:700">✅ 已确认</span>':'<span style="color:#f87171;font-weight:700">❌ 未确认</span>'}</td>
                 <td>${statusBadge(o.status)}</td>
-                <td style="font-size:11px;color:#dc2626;max-width:160px">${factors}</td>
+                <td style="font-size:11px;color:#f87171;max-width:160px">${factors}</td>
               </tr>`;
             }).join("")}
           </tbody>
         </table>
-      </div>` : '<div style="text-align:center;padding:30px;color:#6b7280">暂无订单数据</div>'}
+      </div>` : '<div style="text-align:center;padding:30px;color:#908a82">暂无订单数据</div>'}
     </section>
 
     <!-- ⑤ 审批规则 + 催收建议 -->
@@ -1767,11 +1613,11 @@ function renderRisk() {
             ["🟢", "机构代填资料", "直接拒绝，要求客户本人填写并确认"],
             ["🟢", "催促快速审批", "列为高风险，延长审核周期核实"],
           ].map(([icon, title, desc]) => `
-            <div style="display:flex;gap:10px;padding:8px 10px;border-radius:6px;background:#f8fafc">
+            <div style="display:flex;gap:10px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.03)">
               <span style="font-size:16px;flex-shrink:0">${icon}</span>
               <div>
-                <div style="font-weight:700;font-size:13px;color:#1f2937">${title}</div>
-                <div style="font-size:11px;color:#6b7280;margin-top:2px">${desc}</div>
+                <div style="font-weight:700;font-size:13px;color:#e8e4de">${title}</div>
+                <div style="font-size:11px;color:#908a82;margin-top:2px">${desc}</div>
               </div>
             </div>
           `).join("")}
@@ -1782,21 +1628,21 @@ function renderRisk() {
         <div class="panel-head"><h2>📞 催收跟进建议</h2><span>按逾期天数分级处理</span></div>
         <div style="display:grid;gap:8px">
           ${[
-            ["D1-D7", "短信+电话提醒", "友好提醒，确认是否忘记还款", "#0f766e", "#f0fdf4"],
-            ["D8-D15", "加强电话催收", "每日电话，联系紧急联系人", "#d97706", "#fffbeb"],
-            ["D16-D30", "上门拜访", "安排业务员上门，要求还款承诺书", "#dc2626", "#fef2f2"],
-            ["D31-D60", "法律函件", "发送律师函，启动法律程序警告", "#991b1b", "#fee2e2"],
-            ["D60+", "法律诉讼", "提起诉讼，申请财产保全，联系机构", "#7f1d1d", "#fecaca"],
+            ["D1-D7", "短信+电话提醒", "友好提醒，确认是否忘记还款", "#4ade80", "rgba(74,222,128,0.08)"],
+            ["D8-D15", "加强电话催收", "每日电话，联系紧急联系人", "#fbbf24", "rgba(251,191,36,0.08)"],
+            ["D16-D30", "上门拜访", "安排业务员上门，要求还款承诺书", "#f87171", "rgba(248,113,113,0.08)"],
+            ["D31-D60", "法律函件", "发送律师函，启动法律程序警告", "#fca5a5", "rgba(248,113,113,0.12)"],
+            ["D60+", "法律诉讼", "提起诉讼，申请财产保全，联系机构", "#f87171", "rgba(248,113,113,0.15)"],
           ].map(([period, action, detail, color, bg]) => `
             <div style="padding:10px 12px;border-radius:8px;background:${bg};border-left:3px solid ${color}">
               <div style="display:flex;justify-content:space-between;margin-bottom:3px">
                 <span style="font-weight:800;color:${color};font-size:13px">${period}</span>
                 <span style="font-weight:700;font-size:12px;color:${color}">${action}</span>
               </div>
-              <div style="font-size:11px;color:#374151">${detail}</div>
+              <div style="font-size:11px;color:#e0dbd4">${detail}</div>
             </div>
           `).join("")}
-          <div style="padding:10px;background:#f0f9ff;border-radius:8px;font-size:11px;color:#0369a1;border-left:3px solid #0284c7">
+          <div style="padding:10px;background:rgba(96,165,250,0.06);border-radius:8px;font-size:11px;color:#60a5fa;border-left:3px solid #0284c7">
             💡 <b>提示：</b>医美贷建议在放款前与机构签订回购协议，逾期超30天可要求机构回购该笔贷款，有效控制坏账损失。
           </div>
         </div>
