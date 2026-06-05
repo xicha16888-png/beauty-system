@@ -745,22 +745,7 @@ dialog::backdrop {
         </section>
 
         <section class="view" id="riskView">
-          <div class="rule-grid">
-            <section class="panel">
-              <div class="panel-head"><h2>审批规则</h2><span>建议默认执行</span></div>
-              <ul class="rule-list">
-                <li>客户首付低于 20% 标记高风险。</li>
-                <li>月供超过月收入 30% 标记高风险。</li>
-                <li>同一机构首逾率超过 8% 暂停放量。</li>
-                <li>客户拒绝视频确认直接拒绝。</li>
-                <li>机构代填资料或催促秒批直接复核。</li>
-              </ul>
-            </section>
-            <section class="panel">
-              <div class="panel-head"><h2>待复核订单</h2><span>按风险分排序</span></div>
-              <div id="riskOrders" class="compact-list"></div>
-            </section>
-          </div>
+          <div class="risk-content" style="display:grid;gap:18px"></div>
         </section>
       </main>
     </div>
@@ -1015,15 +1000,45 @@ function allRepayments() {
 }
 
 function riskScore(order) {
-  const downPaymentRatio = order.downPayment / order.totalPrice;
+  const downPaymentRatio = order.downPayment / Math.max(order.totalPrice, 1);
   const monthlyBurden = installmentAmount(order) / Math.max(order.income, 1);
   const clinic = clinicStats(order.clinicId);
-  let score = 20;
-  if (downPaymentRatio < 0.2) score += 25;
-  if (monthlyBurden > 0.3) score += 25;
-  if (!order.videoConfirmed) score += 25;
-  if (clinic.firstOverdueRate > 8) score += 15;
-  if (order.status === "overdue") score += 20;
+  let score = 0;
+  let factors = [];
+
+  // ── 首付比例（权重30）──
+  if (downPaymentRatio < 0.1) { score += 30; factors.push({label:"首付极低(<10%)",weight:30,level:"high"}); }
+  else if (downPaymentRatio < 0.2) { score += 20; factors.push({label:"首付偏低(<20%)",weight:20,level:"medium"}); }
+  else if (downPaymentRatio < 0.3) { score += 8; factors.push({label:"首付一般(<30%)",weight:8,level:"low"}); }
+
+  // ── 收入负担率（权重25）──
+  if (monthlyBurden > 0.5) { score += 25; factors.push({label:"月供超收入50%",weight:25,level:"high"}); }
+  else if (monthlyBurden > 0.35) { score += 18; factors.push({label:"月供超收入35%",weight:18,level:"medium"}); }
+  else if (monthlyBurden > 0.25) { score += 10; factors.push({label:"月供超收入25%",weight:10,level:"low"}); }
+
+  // ── 视频确认（权重20）──
+  if (!order.videoConfirmed || order.videoConfirmed === "no") { score += 20; factors.push({label:"未完成视频确认",weight:20,level:"high"}); }
+
+  // ── 贷款金额（权重10）──
+  if (order.principal > 2000) { score += 10; factors.push({label:"大额贷款(>$2000)",weight:10,level:"medium"}); }
+  else if (order.principal > 1000) { score += 5; factors.push({label:"中额贷款(>$1000)",weight:5,level:"low"}); }
+
+  // ── 期数风险（权重8）──
+  if (order.term >= 12) { score += 8; factors.push({label:"长期贷款(≥12期)",weight:8,level:"medium"}); }
+  else if (order.term >= 9) { score += 4; factors.push({label:"中长期(≥9期)",weight:4,level:"low"}); }
+
+  // ── 机构风险（权重15）──
+  if (clinic.firstOverdueRate > 15) { score += 15; factors.push({label:"机构首逾率>15%",weight:15,level:"high"}); }
+  else if (clinic.firstOverdueRate > 8) { score += 10; factors.push({label:"机构首逾率>8%",weight:10,level:"medium"}); }
+
+  // ── 当前逾期（权重20）──
+  if (order.status === "overdue") { score += 20; factors.push({label:"当前已逾期",weight:20,level:"high"}); }
+
+  // ── 收入过低（权重8）──
+  if (order.income < 300) { score += 8; factors.push({label:"月收入<$300",weight:8,level:"high"}); }
+  else if (order.income < 500) { score += 4; factors.push({label:"月收入<$500",weight:4,level:"medium"}); }
+
+  order._riskFactors = factors;
   return Math.min(score, 100);
 }
 
@@ -1477,7 +1492,190 @@ function renderReports() {
 }
 
 function renderRisk() {
-  document.getElementById("riskOrders").innerHTML = riskRows(state.orders, state.orders.length);
+  const orders = state.orders.filter(o => o.status !== "rejected");
+  const scoredOrders = orders.map(o => { const s = riskScore(o); return {...o, _score: s}; })
+    .sort((a, b) => b._score - a._score);
+
+  const highRisk = scoredOrders.filter(o => o._score >= 70);
+  const midRisk = scoredOrders.filter(o => o._score >= 45 && o._score < 70);
+  const lowRisk = scoredOrders.filter(o => o._score < 45);
+  const overdue = orders.filter(o => o.status === "overdue");
+  const noVideo = orders.filter(o => !o.videoConfirmed || o.videoConfirmed === "no");
+  const highBurden = orders.filter(o => installmentAmount(o) / Math.max(o.income, 1) > 0.35);
+  const lowDown = orders.filter(o => o.downPayment / Math.max(o.totalPrice, 1) < 0.2);
+
+  // 机构风险分析
+  const clinicRisk = state.clinics.map(clinic => {
+    const cs = clinicStats(clinic.id);
+    const clinicOrders = orders.filter(o => o.clinicId === clinic.id);
+    const overdueCount = clinicOrders.filter(o => o.status === "overdue").length;
+    const totalActive = clinicOrders.filter(o => ["active","overdue"].includes(o.status)).length;
+    const overdueRate = totalActive > 0 ? (overdueCount / totalActive) * 100 : 0;
+    return { name: clinic.name, orders: clinicOrders.length, principal: cs.principal,
+      limit: clinic.limit, used: cs.principal / Math.max(clinic.limit, 1) * 100,
+      overdueRate, overdueCount, firstOverdueRate: cs.firstOverdueRate };
+  }).filter(c => c.orders > 0);
+
+  const riskEl = document.getElementById("riskView");
+  if (!riskEl) return;
+  const contentEl = riskEl.querySelector(".risk-content");
+  if (!contentEl) return;
+
+  contentEl.innerHTML = `
+    <!-- ① 风险仪表盘 -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px">
+      ${[
+        ["🔴 高风险订单", highRisk.length, "#fee2e2", "#991b1b", "风险分≥70"],
+        ["🟡 中风险订单", midRisk.length, "#fef3c7", "#92400e", "风险分45-69"],
+        ["🟢 低风险订单", lowRisk.length, "#dcfce7", "#166534", "风险分<45"],
+        ["⚠️ 当前逾期", overdue.length, "#fce7f3", "#9d174d", `占比${pct(orders.length?(overdue.length/orders.length)*100:0)}`],
+      ].map(([label, val, bg, color, note]) => `
+        <div style="background:${bg};border-radius:10px;padding:16px;text-align:center">
+          <div style="font-size:13px;color:${color};font-weight:700;margin-bottom:8px">${label}</div>
+          <div style="font-size:32px;font-weight:800;color:${color}">${val}</div>
+          <div style="font-size:11px;color:${color};opacity:.7;margin-top:4px">${note}</div>
+        </div>
+      `).join("")}
+    </div>
+
+    <!-- ② 预警指标 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+      <section class="panel" style="border-left:4px solid #dc2626">
+        <div class="panel-head"><h2>🚨 风险预警</h2><span>需要立即处理</span></div>
+        <div style="display:grid;gap:8px">
+          ${[
+            ["未视频确认客户", noVideo.length, "未完成视频确认，无法核实意愿", "#dc2626", noVideo.length > 0],
+            ["高负担率客户", highBurden.length, "月供超收入35%，还款压力大", "#d97706", highBurden.length > 0],
+            ["低首付客户", lowDown.length, "首付低于20%，违约风险高", "#7c3aed", lowDown.length > 0],
+            ["逾期未处理", overdue.length, "需要立即跟进催收", "#dc2626", overdue.length > 0],
+          ].map(([label, count, desc, color, alert]) => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;background:${alert?'#fff7f7':'#f8fafc'};border:1px solid ${alert?'#fecaca':'#e5e7eb'}">
+              <div>
+                <div style="font-weight:700;font-size:13px;color:${alert?color:'#374151'}">${label}</div>
+                <div style="font-size:11px;color:#6b7280;margin-top:2px">${desc}</div>
+              </div>
+              <div style="font-size:22px;font-weight:800;color:${alert?color:'#9ca3af'};min-width:36px;text-align:right">${count}</div>
+            </div>
+          `).join("")}
+        </div>
+      </section>
+
+      <!-- ③ 机构风险监控 -->
+      <section class="panel" style="border-left:4px solid #d97706">
+        <div class="panel-head"><h2>🏥 机构风险监控</h2><span>额度使用与逾期率</span></div>
+        <div style="display:grid;gap:10px">
+          ${clinicRisk.length ? clinicRisk.map(c => {
+            const limitPct = Math.min(c.used, 100);
+            const limitColor = c.used > 90 ? "#dc2626" : c.used > 70 ? "#d97706" : "#0f766e";
+            const overdueColor = c.overdueRate > 15 ? "#dc2626" : c.overdueRate > 8 ? "#d97706" : "#15803d";
+            return `
+              <div style="padding:10px 12px;border-radius:8px;background:#f8fafc;border:1px solid #e5e7eb">
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                  <strong style="font-size:13px">${c.name}</strong>
+                  <span style="font-size:12px;color:${overdueColor};font-weight:700">逾期率 ${pct(c.overdueRate)}</span>
+                </div>
+                <div style="font-size:11px;color:#6b7280;margin-bottom:6px">${c.orders}笔 · 放款${money(c.principal)} / 限额${money(c.limit)}</div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="flex:1;height:8px;background:#edf2f5;border-radius:999px;overflow:hidden">
+                    <div style="width:${limitPct}%;height:100%;background:${limitColor};border-radius:999px;transition:.3s"></div>
+                  </div>
+                  <span style="font-size:11px;font-weight:700;color:${limitColor}">${pct(c.used)}</span>
+                </div>
+                ${c.overdueRate > 8 ? `<div style="margin-top:6px;font-size:11px;color:#dc2626;font-weight:600">⚠️ 首逾率超标，建议暂停放量</div>` : ""}
+              </div>`;
+          }).join("") : '<div style="color:#6b7280;text-align:center;padding:20px">暂无机构数据</div>'}
+        </div>
+      </section>
+    </div>
+
+    <!-- ④ 详细风险评分表 -->
+    <section class="panel">
+      <div class="panel-head"><h2>📋 订单风险评分明细</h2><span>按风险分从高到低排序</span></div>
+      ${scoredOrders.length ? `
+      <div style="overflow-x:auto">
+        <table style="min-width:800px">
+          <thead><tr>
+            <th>风险分</th><th>客户</th><th>机构</th><th>项目</th><th>本金</th>
+            <th>首付比</th><th>月供/收入</th><th>视频</th><th>状态</th><th>主要风险点</th>
+          </tr></thead>
+          <tbody>
+            ${scoredOrders.map(o => {
+              const score = o._score;
+              const cls = riskClass(score);
+              const scoreColor = cls==="high"?"#991b1b":cls==="medium"?"#92400e":"#166534";
+              const scoreBg = cls==="high"?"#fee2e2":cls==="medium"?"#fef3c7":"#dcfce7";
+              const dpRatio = pct((o.downPayment/Math.max(o.totalPrice,1))*100);
+              const burden = pct((installmentAmount(o)/Math.max(o.income,1))*100);
+              const factors = (o._riskFactors||[]).filter(f=>f.level==="high").map(f=>f.label).slice(0,2).join("、")||"—";
+              return `<tr>
+                <td><span style="background:${scoreBg};color:${scoreColor};padding:4px 10px;border-radius:20px;font-weight:800;font-size:13px">${score}</span></td>
+                <td><b>${o.customer}</b><div style="font-size:11px;color:#6b7280">${o.phone||""}</div></td>
+                <td style="font-size:12px">${getClinic(o.clinicId).name}</td>
+                <td style="font-size:12px">${o.treatment}</td>
+                <td style="font-weight:700">${money(o.principal)}</td>
+                <td style="color:${parseFloat(dpRatio)<20?"#dc2626":"#374151"};font-weight:600">${dpRatio}</td>
+                <td style="color:${parseFloat(burden)>35?"#dc2626":"#374151"};font-weight:600">${burden}</td>
+                <td>${o.videoConfirmed==="yes"?'<span style="color:#15803d;font-weight:700">✅ 已确认</span>':'<span style="color:#dc2626;font-weight:700">❌ 未确认</span>'}</td>
+                <td>${statusBadge(o.status)}</td>
+                <td style="font-size:11px;color:#dc2626;max-width:160px">${factors}</td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>` : '<div style="text-align:center;padding:30px;color:#6b7280">暂无订单数据</div>'}
+    </section>
+
+    <!-- ⑤ 审批规则 + 催收建议 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <section class="panel" style="border-left:4px solid #0f766e">
+        <div class="panel-head"><h2>📌 审批风控规则</h2><span>建议严格执行</span></div>
+        <div style="display:grid;gap:8px">
+          ${[
+            ["🔴", "首付低于20%", "要求增加首付至20%以上，或拒绝"],
+            ["🔴", "月供超收入35%", "调低贷款金额或增加期数至月供合理"],
+            ["🔴", "未完成视频确认", "必须完成视频核实客户真实意愿"],
+            ["🟡", "机构首逾率>8%", "暂停该机构放量，启动机构风险审查"],
+            ["🟡", "同一客户多笔贷款", "需审核总负债，避免过度授信"],
+            ["🟡", "大额(>$1500)项目", "需要额外审批，建议分期拨付给机构"],
+            ["🟢", "机构代填资料", "直接拒绝，要求客户本人填写并确认"],
+            ["🟢", "催促快速审批", "列为高风险，延长审核周期核实"],
+          ].map(([icon, title, desc]) => `
+            <div style="display:flex;gap:10px;padding:8px 10px;border-radius:6px;background:#f8fafc">
+              <span style="font-size:16px;flex-shrink:0">${icon}</span>
+              <div>
+                <div style="font-weight:700;font-size:13px;color:#1f2937">${title}</div>
+                <div style="font-size:11px;color:#6b7280;margin-top:2px">${desc}</div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </section>
+
+      <section class="panel" style="border-left:4px solid #dc2626">
+        <div class="panel-head"><h2>📞 催收跟进建议</h2><span>按逾期天数分级处理</span></div>
+        <div style="display:grid;gap:8px">
+          ${[
+            ["D1-D7", "短信+电话提醒", "友好提醒，确认是否忘记还款", "#0f766e", "#f0fdf4"],
+            ["D8-D15", "加强电话催收", "每日电话，联系紧急联系人", "#d97706", "#fffbeb"],
+            ["D16-D30", "上门拜访", "安排业务员上门，要求还款承诺书", "#dc2626", "#fef2f2"],
+            ["D31-D60", "法律函件", "发送律师函，启动法律程序警告", "#991b1b", "#fee2e2"],
+            ["D60+", "法律诉讼", "提起诉讼，申请财产保全，联系机构", "#7f1d1d", "#fecaca"],
+          ].map(([period, action, detail, color, bg]) => `
+            <div style="padding:10px 12px;border-radius:8px;background:${bg};border-left:3px solid ${color}">
+              <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                <span style="font-weight:800;color:${color};font-size:13px">${period}</span>
+                <span style="font-weight:700;font-size:12px;color:${color}">${action}</span>
+              </div>
+              <div style="font-size:11px;color:#374151">${detail}</div>
+            </div>
+          `).join("")}
+          <div style="padding:10px;background:#f0f9ff;border-radius:8px;font-size:11px;color:#0369a1;border-left:3px solid #0284c7">
+            💡 <b>提示：</b>医美贷建议在放款前与机构签订回购协议，逾期超30天可要求机构回购该笔贷款，有效控制坏账损失。
+          </div>
+        </div>
+      </section>
+    </div>
+  `;
 }
 
 function riskRows(orders, limit) {
