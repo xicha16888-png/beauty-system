@@ -591,7 +591,6 @@ dialog::backdrop { background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); }
         </div>
         <label class="notes">备注<textarea name="notes" rows="3" placeholder="客户来源、销售、特殊风险点"></textarea></label>
         <div class="dialog-actions">
-          <button class="secondary" type="button" id="resetSampleBtn">恢复演示数据</button>
           <button class="primary" type="submit">保存订单</button>
         </div>
       </form>
@@ -1854,11 +1853,7 @@ document.getElementById("clinicForm").addEventListener("submit", (event) => {
   event.preventDefault();
   addClinic(event.currentTarget);
 });
-document.getElementById("resetSampleBtn").addEventListener("click", async () => {
-  state = structuredClone(sampleData);
-  await saveState();
-  render();
-});
+
 document.getElementById("orderSearch").addEventListener("input", renderOrders);
 document.getElementById("statusFilter").addEventListener("change", renderOrders);
 document.getElementById("clinicFilter").addEventListener("change", renderOrders);
