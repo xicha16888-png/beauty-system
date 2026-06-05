@@ -1160,13 +1160,16 @@ function renderOrders() {
         <td>${order.term}</td>
         <td>${statusBadge(order.status)}</td>
         <td>
-          <select class="status-select" data-id="${order.id}" onchange="changeOrderStatus(this)" style="border:1.5px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;min-width:90px">
-            <option value="pending" ${order.status==="pending"?"selected":""}>待审核</option>
-            <option value="active" ${order.status==="active"?"selected":""}>还款中</option>
-            <option value="overdue" ${order.status==="overdue"?"selected":""}>逾期</option>
-            <option value="closed" ${order.status==="closed"?"selected":""}>已结清</option>
-            <option value="rejected" ${order.status==="rejected"?"selected":""}>已拒绝</option>
-          </select>
+          <div style="display:flex;align-items:center;gap:6px">
+            <select class="status-select" data-id="${order.id}" onchange="changeOrderStatus(this)" style="border:1.5px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;min-width:90px">
+              <option value="pending" ${order.status==="pending"?"selected":""}>待审核</option>
+              <option value="active" ${order.status==="active"?"selected":""}>还款中</option>
+              <option value="overdue" ${order.status==="overdue"?"selected":""}>逾期</option>
+              <option value="closed" ${order.status==="closed"?"selected":""}>已结清</option>
+              <option value="rejected" ${order.status==="rejected"?"selected":""}>已拒绝</option>
+            </select>
+            <button onclick="deleteOrder('${order.id}')" title="删除订单" style="background:#fee2e2;color:#991b1b;border:none;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:13px;font-weight:700;flex-shrink:0" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">🗑</button>
+          </div>
         </td>
       </tr>
     `)
@@ -1778,6 +1781,21 @@ function changeRepayStatus(select, orderId, periodIndex) {
     if (order.paidInstallments > periodIndex) order.paidInstallments = periodIndex;
     if (order.status === "closed") order.status = "active";
   }
+  render();
+  saveState();
+}
+
+function deleteOrder(id) {
+  const order = state.orders.find(o => o.id === id);
+  if (!order) return;
+  // 确认弹窗
+  const confirmed = window.confirm(
+    `确认删除订单？\n\n客户：${order.customer}\n项目：${order.treatment}\n本金：$${order.principal}\n\n⚠️ 删除后该订单的所有还款记录也将消失，此操作不可撤销！`
+  );
+  if (!confirmed) return;
+  // 删除订单
+  state.orders = state.orders.filter(o => o.id !== id);
+  // 全系统同步更新
   render();
   saveState();
 }
