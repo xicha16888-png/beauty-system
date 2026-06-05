@@ -708,16 +708,7 @@ dialog::backdrop {
         </section>
 
         <section class="view" id="repaymentsView">
-          <div class="kpi-grid compact" id="repaymentKpis"></div>
-          <section class="panel">
-            <div class="panel-head"><h2>应收计划</h2><span>按最近到期排序</span></div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>到期日</th><th>订单</th><th>客户</th><th>期数</th><th>应收</th><th>状态</th><th>操作</th></tr></thead>
-                <tbody id="repaymentsTable"></tbody>
-              </table>
-            </div>
-          </section>
+          <div id="repaymentContent"></div>
         </section>
 
         <section class="view" id="clinicsView">
@@ -1176,38 +1167,154 @@ function renderOrders() {
     .join("");
 }
 
-function renderRepayments() {
-  const repayments = allRepayments();
-  const due = repayments.filter((item) => item.status === "unpaid");
-  const overdue = repayments.filter((item) => item.status === "overdue");
-  const paid = repayments.filter((item) => item.status === "paid");
-  document.getElementById("repaymentKpis").innerHTML = [
-    ["未收期数", String(due.length), money(due.reduce((sum, item) => sum + item.amount, 0))],
-    ["逾期期数", String(overdue.length), money(overdue.reduce((sum, item) => sum + item.amount, 0))],
-    ["已收期数", String(paid.length), money(paid.reduce((sum, item) => sum + item.amount, 0))],
-  ].map(kpiCard).join("");
+let _repayTab = "pending"; // pending | overdue | thisMonth | all
+let _repaySearch = "";
 
-  document.getElementById("repaymentsTable").innerHTML = repayments
-    .map((item) => {
-      const order = state.orders.find((candidate) => candidate.id === item.orderId);
-      return `
-        <tr>
-          <td>${item.dueDate}</td>
-          <td>${item.orderId}</td>
-          <td>${item.customer}</td>
-          <td>${item.index}/${order.term}</td>
-          <td>${money(item.amount)}</td>
-          <td>
-            <select onchange="changeRepayStatus(this,'${item.orderId}',${item.index-1})" style="border:1.5px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;min-width:80px;color:${item.status==='paid'?'#166534':item.status==='overdue'?'#991b1b':'#92400e'}">
-              <option value="unpaid" ${item.status==="unpaid"?"selected":""}>未收</option>
-              <option value="paid" ${item.status==="paid"?"selected":""}>已还</option>
-              <option value="overdue" ${item.status==="overdue"?"selected":""}>逾期</option>
-            </select>
-          </td>
-        </tr>
-      `;
-    })
-    .join("");
+function renderRepayments() {
+  const all = allRepayments();
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0,10);
+  const thisMonth = today.toISOString().slice(0,7);
+
+  const pending = all.filter(i => i.status === "unpaid");
+  const overdue = all.filter(i => i.status === "overdue" || (i.status === "unpaid" && i.dueDate < todayStr));
+  const thisMonthItems = all.filter(i => i.dueDate.startsWith(thisMonth));
+  const paidItems = all.filter(i => i.status === "paid");
+
+  // 本月应收金额
+  const thisMonthDue = thisMonthItems.filter(i => i.status !== "paid").reduce((s,i) => s+i.amount, 0);
+  const overdueAmt = overdue.reduce((s,i) => s+i.amount, 0);
+  const pendingAmt = pending.reduce((s,i) => s+i.amount, 0);
+  const paidAmt = paidItems.reduce((s,i) => s+i.amount, 0);
+
+  const el = document.getElementById("repaymentContent");
+  if (!el) return;
+
+  // 根据当前tab筛选数据
+  let tabItems = [];
+  if (_repayTab === "overdue") tabItems = overdue;
+  else if (_repayTab === "thisMonth") tabItems = thisMonthItems;
+  else if (_repayTab === "all") tabItems = all;
+  else tabItems = pending;
+
+  // 搜索过滤
+  if (_repaySearch) {
+    const kw = _repaySearch.toLowerCase();
+    tabItems = tabItems.filter(i =>
+      i.customer.toLowerCase().includes(kw) ||
+      i.orderId.toLowerCase().includes(kw) ||
+      (i.treatment||"").toLowerCase().includes(kw)
+    );
+  }
+
+  el.innerHTML = `
+    <!-- KPI 卡片 -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px">
+      <div style="background:#fff;border-radius:10px;padding:16px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,.06);border-left:4px solid #d97706;cursor:pointer" onclick="switchRepayTab('pending')">
+        <div style="font-size:12px;color:#92400e;font-weight:700">⏳ 待收期数</div>
+        <div style="font-size:28px;font-weight:800;color:#d97706;margin:6px 0">${pending.length}</div>
+        <div style="font-size:12px;color:#6b7280">${money(pendingAmt)}</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:16px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,.06);border-left:4px solid #dc2626;cursor:pointer" onclick="switchRepayTab('overdue')">
+        <div style="font-size:12px;color:#991b1b;font-weight:700">🚨 逾期期数</div>
+        <div style="font-size:28px;font-weight:800;color:#dc2626;margin:6px 0">${overdue.length}</div>
+        <div style="font-size:12px;color:#6b7280">${money(overdueAmt)}</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:16px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,.06);border-left:4px solid #0284c7;cursor:pointer" onclick="switchRepayTab('thisMonth')">
+        <div style="font-size:12px;color:#0369a1;font-weight:700">📅 本月应收</div>
+        <div style="font-size:28px;font-weight:800;color:#0284c7;margin:6px 0">${thisMonthItems.length}</div>
+        <div style="font-size:12px;color:#6b7280">${money(thisMonthDue)}</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:16px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,.06);border-left:4px solid #0f766e;cursor:pointer" onclick="switchRepayTab('all')">
+        <div style="font-size:12px;color:#065f46;font-weight:700">✅ 已收期数</div>
+        <div style="font-size:28px;font-weight:800;color:#0f766e;margin:6px 0">${paidItems.length}</div>
+        <div style="font-size:12px;color:#6b7280">${money(paidAmt)}</div>
+      </div>
+    </div>
+
+    <!-- 标签页 + 搜索 -->
+    <section class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="display:flex;gap:6px">
+          ${[
+            ["pending","⏳ 待收","#d97706","#fef3c7"],
+            ["overdue","🚨 逾期","#dc2626","#fee2e2"],
+            ["thisMonth","📅 本月","#0284c7","#e0f2fe"],
+            ["all","📋 全部","#374151","#f3f4f6"],
+          ].map(([tab, label, color, bg]) => `
+            <button onclick="switchRepayTab('${tab}')" style="padding:7px 14px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:700;background:${_repayTab===tab?bg:'#f3f4f6'};color:${_repayTab===tab?color:'#6b7280'};transition:.2s">
+              ${label} ${tab==="pending"?pending.length:tab==="overdue"?overdue.length:tab==="thisMonth"?thisMonthItems.length:all.length}
+            </button>
+          `).join("")}
+        </div>
+        <input type="search" placeholder="🔍 搜索客户/订单号/项目..." value="${_repaySearch}"
+          oninput="_repaySearch=this.value;renderRepayments()"
+          style="border:1.5px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:13px;min-width:240px;outline:none">
+      </div>
+
+      ${tabItems.length === 0 ? `
+        <div style="text-align:center;padding:40px;color:#6b7280">
+          <div style="font-size:36px;margin-bottom:12px">${_repaySearch?"🔍":"✅"}</div>
+          <div>${_repaySearch?"没有找到匹配的记录":"这个分类暂无记录"}</div>
+        </div>
+      ` : `
+      <div style="overflow-x:auto">
+        <table style="min-width:780px">
+          <thead>
+            <tr style="background:#f8fafc">
+              <th style="padding:10px 12px;font-size:11px;color:#6b7280;font-weight:800;text-transform:uppercase">到期日</th>
+              <th style="padding:10px 12px;font-size:11px;color:#6b7280;font-weight:800;text-transform:uppercase">订单</th>
+              <th style="padding:10px 12px;font-size:11px;color:#6b7280;font-weight:800;text-transform:uppercase">客户</th>
+              <th style="padding:10px 12px;font-size:11px;color:#6b7280;font-weight:800;text-transform:uppercase">项目</th>
+              <th style="padding:10px 12px;font-size:11px;color:#6b7280;font-weight:800;text-transform:uppercase">期数</th>
+              <th style="padding:10px 12px;font-size:11px;color:#6b7280;font-weight:800;text-transform:uppercase">应收</th>
+              <th style="padding:10px 12px;font-size:11px;color:#6b7280;font-weight:800;text-transform:uppercase">逾期天数</th>
+              <th style="padding:10px 12px;font-size:11px;color:#6b7280;font-weight:800;text-transform:uppercase">状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tabItems.map(item => {
+              const order = state.orders.find(o => o.id === item.orderId);
+              if (!order) return "";
+              const isOverdue = item.status === "overdue" || (item.status === "unpaid" && item.dueDate < todayStr);
+              const overdueDays = isOverdue && item.status !== "paid"
+                ? Math.floor((today - new Date(item.dueDate)) / 86400000) : 0;
+              const rowBg = item.status === "paid" ? "#f0fdf4" : isOverdue ? "#fef2f2" : item.dueDate.startsWith(thisMonth) ? "#fffbeb" : "#fff";
+              return `
+                <tr style="background:${rowBg};border-bottom:1px solid #f3f4f6">
+                  <td style="padding:12px 12px;font-weight:${isOverdue?700:400};color:${isOverdue?"#dc2626":"#374151"}">${item.dueDate}</td>
+                  <td style="padding:12px 12px;font-size:12px;color:#6b7280">${item.orderId}</td>
+                  <td style="padding:12px 12px"><strong>${item.customer}</strong></td>
+                  <td style="padding:12px 12px;font-size:12px;color:#374151">${order.treatment||""}</td>
+                  <td style="padding:12px 12px;font-size:13px;color:#374151">${item.index}/${order.term}</td>
+                  <td style="padding:12px 12px;font-weight:700;color:${isOverdue?"#dc2626":"#0f766e"}">${money(item.amount)}</td>
+                  <td style="padding:12px 12px">
+                    ${overdueDays > 0
+                      ? `<span style="background:#fee2e2;color:#991b1b;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700">逾期 ${overdueDays} 天</span>`
+                      : item.status === "paid"
+                        ? `<span style="color:#15803d;font-size:12px">—</span>`
+                        : `<span style="color:#6b7280;font-size:12px">—</span>`}
+                  </td>
+                  <td style="padding:12px 12px">
+                    <select onchange="changeRepayStatus(this,'${item.orderId}',${item.index-1})"
+                      style="border:1.5px solid ${item.status==='paid'?'#86efac':item.status==='overdue'||isOverdue?'#fca5a5':'#fcd34d'};border-radius:6px;padding:5px 8px;font-size:12px;font-weight:700;cursor:pointer;background:${item.status==='paid'?'#f0fdf4':item.status==='overdue'||isOverdue?'#fef2f2':'#fffbeb'};color:${item.status==='paid'?'#15803d':item.status==='overdue'||isOverdue?'#991b1b':'#92400e'};min-width:80px">
+                      <option value="unpaid" ${item.status==="unpaid"?"selected":""}>未收</option>
+                      <option value="paid" ${item.status==="paid"?"selected":""}>已还</option>
+                      <option value="overdue" ${item.status==="overdue"?"selected":""}>逾期</option>
+                    </select>
+                  </td>
+                </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>`}
+    </section>
+  `;
+}
+
+function switchRepayTab(tab) {
+  _repayTab = tab;
+  renderRepayments();
 }
 
 function renderClinics() {
